@@ -3,9 +3,6 @@ import aiosqlite
 from typing import Optional
 
 
-
-
-
 class AsyncDataBase:
     _instance: Optional["AsyncDataBase"] = None
 
@@ -24,7 +21,7 @@ class AsyncDataBase:
             cls._instance._db_path = db_path
             cls._instance._connection = None
         return cls._instance
-    
+
     async def connect(self):
         if self._connection is None:
             self._connection = await aiosqlite.connect(self._db_path)

@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from handlers import different_types, start, timer
+from handlers import start
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -20,7 +20,7 @@ async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
     await bot.delete_webhook(drop_pending_updates=True)
-    dp.include_routers(start.router, timer.router, different_types.router)
+    dp.include_routers(start.router)
     await dp.start_polling(bot)
 
 
