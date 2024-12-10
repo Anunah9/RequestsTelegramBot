@@ -6,6 +6,7 @@ from assets.user import User
 from handlers import register
 from aiogram.fsm.context import FSMContext
 from assets.user import User, UserState
+
 router = Router()
 router.include_router(register.router)
 
