@@ -26,5 +26,6 @@ async def greet_new_user(message: Message, state: FSMContext):
         await state.set_state(UserState.set_name)
 
     else:
+        await user.update_user_info_from_db()
         registered_text = f"Добро пожаловать {user.surname} {user.name}"
         await message.answer(registered_text, reply_markup=main_menu_keybord())

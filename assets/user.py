@@ -22,6 +22,11 @@ class User:
         self.department = department
         self.role = role
 
+    async def update_user_info_from_db(self):
+        _, self.name, self.surname, self.department, self.role = (
+            await self.db.get_user_from_db(self.telegram_id)
+        )
+
     async def is_registered(self) -> bool:
         """Проверяет зарегистрирован ли пользователь"""
         await self.db.connect()
@@ -30,8 +35,6 @@ class User:
     def get_user_data(self) -> dict:
         """Возвращает словарь с атрибутами класса"""
         return self.__dict__
-
-    
 
 
 class UserState(StatesGroup):
