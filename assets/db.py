@@ -11,12 +11,14 @@ class AsyncDataBase:
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             if self._connection is None:
-                raise ConnectionError("Database connection is not established. Call `connect()` first.")
+                raise ConnectionError(
+                    "Database connection is not established. Call `connect()` first."
+                )
             return func(self, *args, **kwargs)
+
         return wrapper
-    
+
     def __new__(cls, db_path: str):
-        """Переопределение метода создания нового экземпляра класса на синглтон"""
         if cls._instance is None:
             cls._instance = super(AsyncDataBase, cls).__new__(cls)
             cls._instance._db_path = db_path
@@ -26,7 +28,7 @@ class AsyncDataBase:
     async def connect(self) -> None:
         if self._connection is None:
             self._connection = await aiosqlite.connect(self._db_path)
-    
+
     async def close(self) -> None:
         if self._connection:
             await self._connection.close()
@@ -34,14 +36,18 @@ class AsyncDataBase:
 
     @is_connected
     async def get_user_from_db(self, telegram_id: int) -> tuple:
-        async with self._connection.execute("SELECT * FROM Users WHERE telegram_id=?", (telegram_id,)) as cursor:
+        async with self._connection.execute(
+            "SELECT * FROM Users WHERE telegram_id=?", (telegram_id,)
+        ) as cursor:
             return await cursor.fetchone()
-        
+
     @is_connected
     async def __add_user_to_db(self, user_obj: dict):
-        async with self._connection.execute("INSERT INTO Users VALUES (?, ?, ?, ?, ?)", [i[1] for i in user_obj]) as cursor:
-            return await cursor.fetchone()
-        
+        await self._connection.execute(
+            "INSERT INTO Users VALUES (?, ?, ?, ?, ?)", [i[1] for i in user_obj.items()]
+        )
+        await self._connection.commit()
+
     @is_connected
     async def register_new_user(self, user_obj: dict) -> bool:
         """Функция регистрации нового пользователя"""
@@ -49,6 +55,4 @@ class AsyncDataBase:
             await self.__add_user_to_db(user_obj)
             return True
         else:
-            raise Exception("User data not comlete")
-
-    
+            raise Exception("User data not comlete:", print(user_obj.items()))
