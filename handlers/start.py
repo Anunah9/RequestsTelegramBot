@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
-from keyboards.start_keyboard import start_keybord
+from keyboards.main_menu import main_menu_keybord
 from assets.user import User
 from handlers import register
 from aiogram.fsm.context import FSMContext
@@ -26,4 +26,4 @@ async def greet_new_user(message: Message, state: FSMContext):
 
     else:
         registered_text = f"Добро пожаловать {user.surname} {user.name}"
-        await message.answer(registered_text, reply_markup=start_keybord())
+        await message.answer(registered_text, reply_markup=main_menu_keybord())
