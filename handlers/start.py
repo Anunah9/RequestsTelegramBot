@@ -21,6 +21,7 @@ async def greet_new_user(message: Message, state: FSMContext):
     if not await user.is_registered():
         register_text = "К сожалению я не могу найти вас в базе пользователей, поэтому пожалуйста перед началом зарегистрируйтесь."
         await message.answer(register_text)
+        # Установка состояния на set_name и переход к логике регистрации.
         await message.answer("Для регистрации в боте введите пожалуйста свое имя:")
         await state.set_state(UserState.set_name)
 

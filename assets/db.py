@@ -37,8 +37,8 @@ class AsyncDataBase:
             return await cursor.fetchone()
         
     @is_connected
-    async def add_user_to_db(self, user_obj: list):
-        async with self._connection.execute("INSERT INTO Users VALUES (?, ?, ?, ?, ?)", user_obj) as cursor:
+    async def add_user_to_db(self, user_obj: dict):
+        async with self._connection.execute("INSERT INTO Users VALUES (?, ?, ?, ?, ?)", [i[1] for i in user_obj]) as cursor:
             return await cursor.fetchone()
 
     
