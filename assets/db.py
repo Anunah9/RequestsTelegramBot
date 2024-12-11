@@ -56,3 +56,9 @@ class AsyncDataBase:
             return True
         else:
             raise Exception("User data not comlete:", print(user_obj.items()))
+
+    @is_connected
+    async def get_roles_dict(self) -> dict:
+        """Получение словаря с ролями"""
+        async with self._connection.execute("SELECT * FROM Roles") as cursor:
+            return dict(await cursor.fetchall())
