@@ -12,7 +12,7 @@ from aiogram.types import ReplyKeyboardRemove
 router = Router()
 
 
-@router.message(StateFilter(None))
+@router.message(StateFilter(UserState.start_register))
 async def cmd_registration(message: Message, state: FSMContext):
     await message.answer("Для регистрации в боте введите пожалуйста свое имя:")
     await state.set_state(UserState.set_name)
