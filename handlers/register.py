@@ -1,13 +1,12 @@
 from aiogram import types
 from aiogram import Router, F
 from aiogram.types import Message
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from assets.user import UserState, User
 from assets.db import AsyncDataBase
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.role_keyboard import choose_role_keyboard
-from aiogram.types import ReplyKeyboardRemove
 
 router = Router()
 
