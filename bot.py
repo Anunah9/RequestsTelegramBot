@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from handlers import start
+from handlers import start, create_order
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -24,11 +24,10 @@ async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=MemoryStorage())
     await bot.delete_webhook(drop_pending_updates=True)
-    dp.include_routers(start.router)
+    dp.include_routers(start.router, create_order.router)
     await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
 
     asyncio.run(main())
-

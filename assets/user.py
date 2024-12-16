@@ -47,4 +47,4 @@ class UserState(StatesGroup):
     set_role = State()
 
     # Возможно нужно перенести в класс MainMenuStates
-    main_menu_state = State()
+

@@ -31,4 +31,5 @@ async def greet_new_user(message: Message, state: FSMContext):
         await message.answer(
             registered_text, reply_markup=main_menu_keybord(user.rights)
         )
-        await state.set_state(UserState.main_menu_state)
+
+
