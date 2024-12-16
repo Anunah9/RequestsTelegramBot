@@ -62,3 +62,9 @@ class AsyncDataBase:
         """Получение словаря с ролями"""
         async with self._connection.execute("SELECT * FROM Roles") as cursor:
             return dict(await cursor.fetchall())
+
+    @is_connected
+    async def get_rights_set(self, role) -> set:
+        """Получение словаря с ролями"""
+        async with self._connection.execute(f"SELECT * FROM Rights WHERE role={role}") as cursor:
+            return set(await cursor.fetchall()[2::])
