@@ -23,7 +23,7 @@ async def greet_new_user(message: Message, state: FSMContext):
         await message.answer(register_text)
         # Установка состояния на set_name и переход к логике регистрации.
         await message.answer("Для регистрации в боте введите пожалуйста свое имя:")
-        await state.set_state(UserState.start_register)
+        await state.set_state(UserState.set_name)
 
     else:
         await user.update_user_info_from_db()
@@ -31,5 +31,3 @@ async def greet_new_user(message: Message, state: FSMContext):
         await message.answer(
             registered_text, reply_markup=main_menu_keybord(user.rights)
         )
-
-

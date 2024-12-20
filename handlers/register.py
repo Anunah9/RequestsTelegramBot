@@ -81,4 +81,5 @@ async def end_registration(callback: types.CallbackQuery, state: FSMContext):
     )
     await db.register_new_user(user.get_user_data())
     await state.clear()
-    await callback.answer(text="Спасибо за регистрацию.\nПриятного пользования")
+    await callback.answer(text="Спасибо за регистрацию.\nПриятного пользования", )
+
