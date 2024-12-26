@@ -7,7 +7,8 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from handlers import start, create_order
+from handlers import start
+from handlers.main_menu import create_order
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")

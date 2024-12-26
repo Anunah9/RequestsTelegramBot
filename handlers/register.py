@@ -27,27 +27,32 @@ async def input_name(message: Message, state: FSMContext):
 @router.message(UserState.set_surname, F.text)
 async def input_name(message: Message, state: FSMContext):
     await state.update_data(surname=message.text)
+    db = AsyncDataBase("./db.db")
+    role_dict = await db.get_roles_dict()
+    print(role_dict)
+    await state.update_data(roles=role_dict)
     await message.answer(
         "Принято. Теперь введите пожалуйста вашу роль.",
-        reply_markup=await choose_role_keyboard(),
+        reply_markup=await choose_role_keyboard(role_dict),
     )
     await state.set_state(UserState.set_role)
 
 
 @router.message(UserState.set_role, F.text)
 async def input_role(message: Message, state: FSMContext):
+    user_data = await state.get_data()
+    roles = user_data["roles"]
     role_str = message.text
-    role_dict = await AsyncDataBase("./db.db").get_roles_dict()
-    role = list(filter(lambda x: x[1] == role_str, role_dict.items()))
-    if role:
 
-        await state.update_data(role=role[0])
+    if role_str in roles:
+
+        await state.update_data(role=role_str)
         await message.answer("Принято. Теперь введите пожалуйста ваш отдел.")
         await state.set_state(UserState.set_department)
     else:
         message.answer(
             "Что-то пошло не так. Пожалуйста повторите ввод.",
-            reply_markup=await choose_role_keyboard(),
+            reply_markup=await choose_role_keyboard(roles),
         )
 
 
@@ -77,9 +82,10 @@ async def end_registration(callback: types.CallbackQuery, state: FSMContext):
         user_data["name"],
         user_data["surname"],
         user_data["department"],
-        int(user_data["role"][0]),
+        user_data["role"][0],
     )
     await db.register_new_user(user.get_user_data())
     await state.clear()
-    await callback.answer(text="Спасибо за регистрацию.\nПриятного пользования", )
-
+    await callback.answer(
+        text="Спасибо за регистрацию.\nПриятного пользования",
+    )

@@ -13,7 +13,7 @@ class User:
         name: str = None,
         surname: str = None,
         department: str = None,
-        role: int = None,
+        role=None,
     ):
         self.telegram_id = telegram_id
         self.name = name
@@ -47,4 +47,4 @@ class UserState(StatesGroup):
     set_role = State()
 
     # Возможно нужно перенести в класс MainMenuStates
-
+    

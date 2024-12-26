@@ -1,5 +1,5 @@
 RIGHTS = {
-    1: {
+    2: {
         "role_name": "Диспетчер",
         "rights": {
             "create_order",
@@ -9,7 +9,7 @@ RIGHTS = {
             "check_order_info",
         },
     },
-    2: {
+    1: {
         "role_name": "Рабочий",
         "rights": {"change_order_status", "check_order_info"},
     },
