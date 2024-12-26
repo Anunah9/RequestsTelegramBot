@@ -9,12 +9,13 @@ class AsyncDataBase:
     @staticmethod
     def is_connected(func):
         @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):
+        async def wrapper(self, *args, **kwargs):
             if self._connection is None:
-                raise ConnectionError(
-                    "Database connection is not established. Call `connect()` first."
-                )
-            return func(self, *args, **kwargs)
+                await self.connect()
+                # raise ConnectionError(
+                #     "Database connection is not established. Call `connect()` first."
+                # )
+            return await func(self, *args, **kwargs)
 
         return wrapper
 
@@ -66,5 +67,7 @@ class AsyncDataBase:
     @is_connected
     async def get_rights_set(self, role) -> set:
         """Получение словаря с ролями"""
-        async with self._connection.execute(f"SELECT * FROM Rights WHERE role={role}") as cursor:
+        async with self._connection.execute(
+            f"SELECT * FROM Rights WHERE role={role}"
+        ) as cursor:
             return set(await cursor.fetchall()[2::])
