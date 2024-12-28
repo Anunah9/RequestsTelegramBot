@@ -1,6 +1,6 @@
 import functools
 import aiosqlite
-from typing import Optional
+from typing import List, Optional, Tuple
 
 
 class AsyncDataBase:
@@ -12,9 +12,6 @@ class AsyncDataBase:
         async def wrapper(self, *args, **kwargs):
             if self._connection is None:
                 await self.connect()
-                # raise ConnectionError(
-                #     "Database connection is not established. Call `connect()` first."
-                # )
             return await func(self, *args, **kwargs)
 
         return wrapper
@@ -43,31 +40,32 @@ class AsyncDataBase:
             return await cursor.fetchone()
 
     @is_connected
-    async def __add_user_to_db(self, user_obj: dict):
+    async def __add_user_to_db(self, user_obj: Tuple):
         await self._connection.execute(
-            "INSERT INTO Users VALUES (?, ?, ?, ?, ?)", [i[1] for i in user_obj.items()]
+            "INSERT INTO Users VALUES (?, ?, ?, ?, ?)", user_obj
         )
         await self._connection.commit()
 
     @is_connected
-    async def register_new_user(self, user_obj: dict) -> bool:
+    async def register_new_user(self, user_obj: Tuple) -> bool:
         """Функция регистрации нового пользователя"""
-        if all([bool(i[1]) for i in user_obj.items()]):
+        if all([bool(i) for i in user_obj]):
             await self.__add_user_to_db(user_obj)
             return True
         else:
             raise Exception("User data not comlete:", print(user_obj.items()))
 
     @is_connected
-    async def get_roles_dict(self) -> dict:
+    async def get_roles(self) -> List:
         """Получение словаря с ролями"""
         async with self._connection.execute("SELECT * FROM Roles") as cursor:
             return [role[0] for role in await cursor.fetchall()]
 
     @is_connected
-    async def get_rights_set(self, role) -> set:
-        """Получение словаря с ролями"""
+    async def get_rights_set(self, role) -> Tuple:
+        """Получение словаря с правами роли"""
         async with self._connection.execute(
-            f"SELECT * FROM Rights WHERE role={role}"
+            "SELECT role_name, rr.permission_name, definition FROM RoleRights rr JOIN (RightsDefinitions) WHERE rr.permission_name=name AND role_name=?",
+            role,
         ) as cursor:
-            return set(await cursor.fetchall()[2::])
+            return await cursor.fetchall()

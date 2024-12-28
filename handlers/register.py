@@ -3,10 +3,11 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from assets.user import UserState, User
+from assets.user import UserState, User, AsyncDatabaseUserRepository
 from assets.db import AsyncDataBase
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.role_keyboard import choose_role_keyboard
+from keyboards.main_menu import main_menu_keybord
 
 router = Router()
 
@@ -28,12 +29,12 @@ async def input_name(message: Message, state: FSMContext):
 async def input_name(message: Message, state: FSMContext):
     await state.update_data(surname=message.text)
     db = AsyncDataBase("./db.db")
-    role_dict = await db.get_roles_dict()
-    print(role_dict)
-    await state.update_data(roles=role_dict)
+    roles = await db.get_roles()
+    print(roles)
+    await state.update_data(roles=roles)
     await message.answer(
         "Принято. Теперь введите пожалуйста вашу роль.",
-        reply_markup=await choose_role_keyboard(role_dict),
+        reply_markup=await choose_role_keyboard(roles),
     )
     await state.set_state(UserState.set_role)
 
@@ -74,18 +75,20 @@ async def input_surname(message: Message, state: FSMContext):
 async def end_registration(callback: types.CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
     await callback.message.answer(
-        f"ФИО: {user_data['name']} {user_data['surname']}\nВаш отдел {user_data['department']} Ваша роль: {user_data['role'][1]}"
+        f"ФИО: {user_data['name']} {user_data['surname']}\nВаш отдел {user_data['department']} Ваша роль: {user_data['role']}"
     )
-    db = AsyncDataBase("./db.db")
-    user = User(
-        callback.message.chat.id,
-        user_data["name"],
-        user_data["surname"],
-        user_data["department"],
-        user_data["role"][0],
+    repository = AsyncDatabaseUserRepository("./db.db")
+    await repository.register_user(
+        (
+            callback.message.chat.id,
+            user_data["name"],
+            user_data["surname"],
+            user_data["department"],
+            user_data["role"],
+        )
     )
-    await db.register_new_user(user.get_user_data())
     await state.clear()
     await callback.answer(
         text="Спасибо за регистрацию.\nПриятного пользования",
+        reply_markup=main_menu_keybord,
     )

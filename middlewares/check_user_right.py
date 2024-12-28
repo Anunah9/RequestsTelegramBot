@@ -3,7 +3,6 @@ from typing import Any, Callable, Dict, Awaitable, Union
 from aiogram.types import TelegramObject
 from assets.user import User
 from assets.db import AsyncDataBase
-from assets.rights import RIGHTS
 
 
 class CheckUserRight(BaseMiddleware):
@@ -16,15 +15,11 @@ class CheckUserRight(BaseMiddleware):
         event: TelegramObject,
         data: Dict[str, Any],
     ) -> Any:
-        db = AsyncDataBase("./db.db")
-        await db.connect()
         user_data = data["event_from_user"]
-        print(user_data)
-        user = User(*(await db.get_user_from_db(user_data.id)))
-        print(user.get_user_data())
-        print(self.right)
-        print(RIGHTS[user.role])
-        if self.right in RIGHTS[user.role]["rights"]:
+        user = User(user_data.id)
+        user.update_user_info_from_db()
+        print(user.rights)
+        if self.right in user.rights:
             result = await handler(event, data)
             return result
         else:

@@ -1,11 +1,5 @@
-try:
-    from assets.db import AsyncDataBase
-    from assets.rights import RIGHTS
-except:
-    from db import AsyncDataBase
-    from rights import RIGHTS
+from assets.db import AsyncDataBase
 from aiogram.fsm.state import StatesGroup, State
-
 from typing import Optional, Dict, Tuple
 import asyncio
 from abc import ABC, abstractmethod
@@ -36,9 +30,13 @@ class UserRepository(ABC):
         """Регистрирует нового пользователя."""
         pass
 
+    @abstractmethod
+    async def get_user_right(self, role: str) -> Optional[Tuple]:
+        pass
+
 
 # Реализация репозитория на основе AsyncDataBase
-class AsyncDatabaseUserRepository(UserRepository):
+class AsyncDatabaseUserRepository:
     def __init__(self, db_path: str):
         self.db = AsyncDataBase(db_path)
 
@@ -50,8 +48,11 @@ class AsyncDatabaseUserRepository(UserRepository):
     ) -> Optional[Tuple[int, str, str, str, int]]:
         return await self.db.get_user_from_db(telegram_id)
 
-    async def register_user(self, user_obj: Dict) -> bool:
+    async def register_user(self, user_obj: Tuple) -> bool:
         return await self.db.register_new_user(user_obj)
+
+    async def get_user_right(self, role) -> Optional[Tuple]:
+        return await self.db.get_rights_set(role)
 
 
 # Изменение класса User для использования абстракции
@@ -59,25 +60,20 @@ class User:
     def __init__(
         self,
         telegram_id: int,
-        name: str = None,
-        surname: str = None,
-        department: str = None,
-        role: int = None,
     ):
         self.telegram_id = telegram_id
-        self.name = name
-        self.surname = surname
-        self.department = department
-        self.role = role
-        self.rights: set
+        self.name: str
+        self.surname: str
+        self.department: str
+        self.role: str
+        self.rights: Tuple
         self.repository = AsyncDatabaseUserRepository("./db.db")
-        
 
     async def update_user_info_from_db(self):
         user_data = await self.repository.get_user(self.telegram_id)
         if user_data:
             _, self.name, self.surname, self.department, self.role = user_data
-            self.rights = RIGHTS.get(self.role, set())
+            self.rights = self.repository.get_user_right(self.role)
 
     async def is_registered(self) -> bool:
         return bool(await self.repository.get_user(self.telegram_id))
@@ -95,4 +91,4 @@ async def main():
 
 # Запуск
 if __name__ == "__main__":
-      asyncio.run(main())
+    asyncio.run(main())
