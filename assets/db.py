@@ -64,8 +64,11 @@ class AsyncDataBase:
     @is_connected
     async def get_rights_set(self, role) -> Tuple:
         """Получение словаря с правами роли"""
+
         async with self._connection.execute(
-            "SELECT role_name, rr.permission_name, definition FROM RoleRights rr JOIN (RightsDefinitions) WHERE rr.permission_name=name AND role_name=?",
-            role,
+            'SELECT rr.permission_name, definition FROM RoleRights rr JOIN (RightsDefinitions) WHERE rr.permission_name=name AND role_name=?',
+            (role,),
         ) as cursor:
             return await cursor.fetchall()
+
+

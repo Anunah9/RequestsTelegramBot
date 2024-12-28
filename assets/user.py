@@ -73,7 +73,8 @@ class User:
         user_data = await self.repository.get_user(self.telegram_id)
         if user_data:
             _, self.name, self.surname, self.department, self.role = user_data
-            self.rights = self.repository.get_user_right(self.role)
+ 
+            self.rights = await self.repository.get_user_right(self.role)
 
     async def is_registered(self) -> bool:
         return bool(await self.repository.get_user(self.telegram_id))
