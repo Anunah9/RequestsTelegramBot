@@ -17,6 +17,7 @@ class CheckUserRight(BaseMiddleware):
     ) -> Any:
         user_data = data["event_from_user"]
         user = User(user_data.id)
+        await user.connect()
         await user.update_user_info_from_db()
         if self.right in [i[0] for i in user.rights]:
             result = await handler(event, data)

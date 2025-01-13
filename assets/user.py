@@ -44,21 +44,18 @@ class AsyncUserRepository:
     async def connect(self):
         await self.db.connect()
 
-    @db.is_connected
-    async def get_user_from_db(self, telegram_id: int) -> tuple:
-        async with self._connection.execute(
+    async def get_user(self, telegram_id: int) -> tuple:
+        async with self.db._connection.execute(
             "SELECT * FROM Users WHERE telegram_id=?", (telegram_id,)
         ) as cursor:
             return await cursor.fetchone()
 
-    @db.is_connected
     async def __add_user_to_db(self, user_obj: Tuple):
-        await self._connection.execute(
+        await self.db._connection.execute(
             "INSERT INTO Users VALUES (?, ?, ?, ?, ?)", user_obj
         )
-        await self._connection.commit()
+        await self.db._connection.commit()
 
-    @db.is_connected
     async def register_user(self, user_obj: Tuple) -> bool:
         """Функция регистрации нового пользователя"""
         if all([bool(i) for i in user_obj]):
@@ -67,17 +64,15 @@ class AsyncUserRepository:
         else:
             raise Exception("User data not comlete:", print(user_obj.items()))
 
-    @db.is_connected
     async def get_roles(self) -> List:
         """Получение словаря с ролями"""
-        async with self._connection.execute("SELECT * FROM Roles") as cursor:
+        async with self.db._connection.execute("SELECT * FROM Roles") as cursor:
             return [role[0] for role in await cursor.fetchall()]
 
-    @db.is_connected
     async def get_user_right(self, role: str) -> Tuple:
         """Получение словаря с правами роли"""
 
-        async with self._connection.execute(
+        async with self.db._connection.execute(
             "SELECT rr.permission_name, definition FROM RoleRights rr JOIN (RightsDefinitions) WHERE rr.permission_name=name AND role_name=?",
             (role,),
         ) as cursor:
@@ -96,6 +91,9 @@ class User:
         self.role: str
         self.rights: Tuple
         self.repository = AsyncUserRepository("./db.db")
+
+    async def connect(self):
+        await self.repository.connect()
 
     async def update_user_info_from_db(self):
         user_data = await self.repository.get_user(self.telegram_id)

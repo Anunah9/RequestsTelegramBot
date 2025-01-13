@@ -3,7 +3,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from assets.user import UserState, User, AsyncDatabaseUserRepository
+from assets.user import UserState, User, AsyncUserRepository
 from assets.db import AsyncDataBase
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.role_keyboard import choose_role_keyboard
@@ -77,7 +77,7 @@ async def end_registration(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer(
         f"ФИО: {user_data['name']} {user_data['surname']}\nВаш отдел {user_data['department']} Ваша роль: {user_data['role']}"
     )
-    repository = AsyncDatabaseUserRepository("./db.db")
+    repository = AsyncUserRepository("./db.db")
     await repository.register_user(
         (
             callback.message.chat.id,

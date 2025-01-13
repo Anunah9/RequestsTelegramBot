@@ -24,15 +24,14 @@ class AsyncDataBase:
             await self._connection.close()
             self._connection = None
 
-    def get_connection(self) -> aiosqlite.Connection:
-        """Возвращает текущее соединение."""
-        if self._connection is None:
-            raise ConnectionError("Соединение с базой данных не установлено.")
-        return self._connection
+    async def commit(self) -> None:
+        """Фиксирует изменения в базе данных."""
+        if self._connection:
+            await self._connection.commit()
 
     @staticmethod
-    def is_connected(func):
-        """Автоматически устанавливает соединение с бд при его отсутствии"""
+    def ensure_connection(func):
+        """Декоратор для проверки и установки соединения с базой данных."""
 
         @functools.wraps(func)
         async def wrapper(self, *args, **kwargs):
