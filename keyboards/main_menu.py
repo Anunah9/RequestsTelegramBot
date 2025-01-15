@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 def main_menu_keybord(rights: Tuple) -> ReplyKeyboardMarkup:
     """Клавиатура основного меню для пользователя"""
-
+    
     builder = ReplyKeyboardBuilder()
     for btn in rights:
         name = btn[1]
