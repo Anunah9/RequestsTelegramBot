@@ -1,16 +1,16 @@
 from aiogram import F, Router
 from aiogram.filters import StateFilter
-from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from assets.user import UserState
-from assets.order import Order, OrderStates
+from assets.order import Order, OrderStates, AsyncOrderRepository
 from keyboards.complete_create_order import complete_create_order
+from keyboards.main_menu import main_menu_keybord
 from middlewares.check_user_right import CheckUserRight
 
 
 router = Router()
 router.message.middleware(CheckUserRight("create_order"))
-## Сделать мидлварь для проверки пользователя
 
 
 @router.message(F.text == "Создать заявку")
@@ -23,37 +23,33 @@ async def create_order(message: Message, state: FSMContext):
 async def set_order_text(message: Message, state: FSMContext):
     await state.update_data(text=message.text)
     await message.answer("Принято. Теперь введите пожалуйста целевый отделы")
+    await message.answer(
+        "Когда закончите вводить отделы отправьте 'Завершить' в чат.",
+    )
     await state.set_state(OrderStates.set_departments)
     await state.update_data(departments=[])
 
 
 @router.message(OrderStates.set_departments)
 async def set_order_departments(message: Message, state: FSMContext):
-    # TODO Поменять порядок if-ов чтобы следовать логике
-    if message.text == "Нет":
+
+    if message.text == "Завершить":
         await message.answer("Принято. Теперь введите пожалуйста работников")
+        await message.answer(
+            "Когда закончите вводить работников отправьте 'Завершить' в чат.",
+        )
         await state.update_data(workers=[])
         await state.set_state(OrderStates.set_workers)
-    elif message.text == "Да":
-        await message.answer("Введите название отдела")
     else:
         await state.update_data(
             departments=[*await state.get_value("departments"), message.text]
-        )
-        await message.answer(
-            "Добавить еще отделы?",
-            reply_markup=ReplyKeyboardMarkup(
-                keyboard=[[KeyboardButton(text="Да")], [KeyboardButton(text="Нет")]],
-                resize_keyboard=True,
-            ),
         )
 
 
 @router.message(OrderStates.set_workers)
 async def set_order_workers(message: Message, state: FSMContext):
-    # TODO Сделать функцию для создания клавиатуры из данных полученных с бд
-    # TODO Поменять порядок if-ов чтобы следовать логике
-    if message.text == "Нет":
+
+    if message.text == "Завершить":
         await message.answer("Принято.")
         state_data = await state.get_data()
         text = state_data["text"]
@@ -63,19 +59,25 @@ async def set_order_workers(message: Message, state: FSMContext):
             f"Текст заявки: {text}\nОтделы: {departments}\nРаботники: {workers}",
             reply_markup=complete_create_order(),
         )
-        new_order = Order(text=text, departments=departments, workers=workers)
-        await new_order.add_new_order()
+        # Move to callback from btn
 
-    elif message.text == "Да":
-        await message.answer("Введите имя сотрудника.")
     else:
         await state.update_data(
             workers=[*await state.get_value("workers"), message.text]
         )
-        await message.answer(
-            "Добавить еще работников?",
-            reply_markup=ReplyKeyboardMarkup(
-                keyboard=[[KeyboardButton(text="Да")], [KeyboardButton(text="Нет")]],
-                resize_keyboard=True,
-            ),
-        )
+
+
+@router.callback_query(F.data == "complete_creation_order", OrderStates.set_workers)
+async def end_registration(callback: CallbackQuery, state: FSMContext):
+    order_data = await state.get_data()
+
+    new_order = Order(
+        text=order_data["text"],
+        departments=order_data["departments"],
+        workers=order_data["workers"],
+    )
+    await new_order.add_new_order()
+    await state.clear()
+    await callback.message.answer(
+        text=f"Заявка добавлена\n Её ID - {new_order.order_id}\nЧтобы открыть основное меню используйте /main_menu",
+    )

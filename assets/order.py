@@ -66,7 +66,8 @@ class AsyncOrderRepository:
 
     async def add_to_departments(self, order_id, department_id):
         async with self.db._connection.execute(
-            "INSERT INTO OrderDepartments VALUES (?, ?)", (order_id, department_id)
+            "INSERT INTO OrderDepartments VALUES (?, ?)",
+            (order_id, department_id),
         ) as cursor:
             return await cursor.fetchone()
 
@@ -89,16 +90,14 @@ class Order:
     async def get_order_by_id(self, order_id):
         return await self.repository.get_order_by_id(order_id=order_id)
 
-    ## TODO Отправлять клавиатуру с отделами и работниками чтобы заранее определять id отделов и работников. Чтобы не приходилось определять id через запросы к бд
-
     async def add_new_order(self):
         (max_order_id,) = await self.repository.get_max_order_id()
-        order_id = max_order_id + 1
+        self.order_id = max_order_id + 1
         current_status = 1
         created_at = datetime.datetime.now()
 
         await self.repository.add_to_orders_table(
-            order_id, self.text, current_status, created_at
+            self.order_id, self.text, current_status, created_at
         )
 
         #  Получаем id каждого работника заявки
@@ -107,7 +106,7 @@ class Order:
             worker_ids.append(*await self.repository.get_worker_id(worker))
         #  Добавляем в таблицу OrderWorkers
         for worker_id in worker_ids:
-            await self.repository.add_to_workers_table(order_id, worker_id)
+            await self.repository.add_to_workers_table(self.order_id, worker_id)
 
         #  Получаем id отделов
         department_ids = []
@@ -115,7 +114,7 @@ class Order:
             department_ids.append(*await self.repository.get_department_id(department))
         #  Добавляем в таблицу OrderWorkers
         for department_id in department_ids:
-            await self.repository.add_to_departments(order_id, department_id)
+            await self.repository.add_to_departments(self.order_id, department_id)
         await self.repository.db.commit()
         return 0
         # return await self.repository.add_new_order()
