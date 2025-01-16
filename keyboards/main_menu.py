@@ -5,10 +5,14 @@ from aiogram.types import (
 )
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
+from assets.user import User
 
-def main_menu_keybord(rights: Tuple) -> ReplyKeyboardMarkup:
+
+async def main_menu_keybord(user_id: Tuple) -> ReplyKeyboardMarkup:
     """Клавиатура основного меню для пользователя"""
-    
+    user = User(user_id)
+    await user.connect()
+    rights = await user.get_user_rigths()
     builder = ReplyKeyboardBuilder()
     for btn in rights:
         name = btn[1]

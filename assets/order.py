@@ -5,6 +5,9 @@ from aiogram.fsm.state import StatesGroup, State
 from assets.db import AsyncDataBase
 
 STATUSES = {1: "Создана", 2: "Отправлена", 3: "Принята", 4: "В работе", 5: "Закрыта"}
+# TODO Сделать обработку ошибок в получении id из бд
+# TODO Сделать lower() при получении id из бд
+# TODO Разобраться с получением id сотрудника по имени и фамилии
 
 
 class OrderStates(StatesGroup):
@@ -45,32 +48,6 @@ class AsyncOrderRepository:
         ) as cursor:
             return await cursor.fetchone()
 
-    async def get_worker_id(self, worker: tuple):
-        """Возвращает id работника по его имени"""
-        async with self.db._connection.execute(
-            "SELECT id FROM Workers WHERE name=?", (worker,)
-        ) as cursor:
-            return await cursor.fetchone()
-
-    async def get_department_id(self, department):
-        async with self.db._connection.execute(
-            "SELECT id FROM Departments WHERE name=?", (department,)
-        ) as cursor:
-            return await cursor.fetchone()
-
-    async def add_to_workers_table(self, order_id, worker_id):
-        async with self.db._connection.execute(
-            "INSERT INTO OrderWorkers VALUES (?, ?)", (order_id, worker_id)
-        ) as cursor:
-            return await cursor.fetchone()
-
-    async def add_to_departments(self, order_id, department_id):
-        async with self.db._connection.execute(
-            "INSERT INTO OrderDepartments VALUES (?, ?)",
-            (order_id, department_id),
-        ) as cursor:
-            return await cursor.fetchone()
-
 
 class Order:
     def __init__(self, text, departments, workers, repository=None):
@@ -81,7 +58,7 @@ class Order:
         self.workers: Union[List] = workers
         self.repository = repository or AsyncOrderRepository("./db.db")
 
-    async def update_order_id(self):
+    async def get_order_id(self):
         self.order_id = await self.repository.get_max_order_id() + 1
 
     async def get_order_list(self) -> Optional[Tuple[int, str, str, str]]:

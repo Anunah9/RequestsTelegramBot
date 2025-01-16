@@ -10,20 +10,20 @@ class AsyncWorkerRepository:
 
     async def get_workers_list(self):
         async with self.db._connection.execute(
-            "SELECT * FROM Workers",
+            "SELECT * FROM Users WHERE role='?'", ("Рабочий")
         ) as cursor:
             return await cursor.fetchall()
 
     async def get_worker_by_id(self, worker_id):
         async with self.db._connection.execute(
-            "SELECT * FROM Workers WHERE id=?", (worker_id,)
+            "SELECT * FROM Users WHERE id=?", (worker_id,)
         ) as cursor:
             return await cursor.fetchone()
 
     async def get_worker_id(self, worker: str):
         """Возвращает id работника по его имени"""
         async with self.db._connection.execute(
-            "SELECT id FROM Workers WHERE name=?", (worker,)
+            "SELECT id FROM Users WHERE name=?", (worker,)
         ) as cursor:
             return await cursor.fetchone()
 
@@ -34,11 +34,10 @@ class AsyncWorkerRepository:
             return await cursor.fetchone()
 
 
-
 class Worker:
     def __init__(self, respository):
         self.repository: AsyncWorkerRepository = respository
-    
+
     async def connect(self):
         self.repository.connect()
 

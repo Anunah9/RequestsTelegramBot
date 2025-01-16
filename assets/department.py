@@ -1,5 +1,6 @@
 from assets.db import AsyncDataBase
 
+
 class AsyncDepartmentRepository:
     def __init__(self, db_path: str):
         self.db = AsyncDataBase(db_path)
@@ -25,19 +26,18 @@ class AsyncDepartmentRepository:
         ) as cursor:
             return await cursor.fetchone()
 
-
     async def add_to_departments(self, order_id, department_id):
         async with self.db._connection.execute(
             "INSERT INTO OrderDepartments VALUES (?, ?)",
             (order_id, department_id),
         ) as cursor:
             return await cursor.fetchone()
-        
 
-class Deparment:
+
+class Department:
     def __init__(self, respository):
         self.repository: AsyncDepartmentRepository = respository
-    
+
     async def connect(self):
         self.repository.connect()
 

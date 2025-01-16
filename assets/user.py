@@ -14,26 +14,8 @@ class UserState(StatesGroup):
     set_department = State()
     set_role = State()
 
-
-# Абстракция репозитория для работы с пользователями
-class UserRepository(ABC):
-    @abstractmethod
-    async def get_user(
-        self, telegram_id: int
-    ) -> Optional[Tuple[int, str, str, str, int]]:
-        """Получает пользователя по telegram_id."""
-        pass
-
-    @abstractmethod
-    async def register_user(self, user_obj: Dict) -> bool:
-        """Регистрирует нового пользователя."""
-        pass
-
-    @abstractmethod
-    async def get_user_right(self, role: str) -> Optional[Tuple]:
-        pass
-
-
+# TODO Убрать ненужную таблицу Workers так как уже есть таблица User
+# TODO Доделать Запрос для получения прав
 # Реализация репозитория на основе AsyncDataBase
 class AsyncUserRepository:
     db: AsyncDataBase = None
@@ -69,12 +51,12 @@ class AsyncUserRepository:
         async with self.db._connection.execute("SELECT * FROM Roles") as cursor:
             return [role[0] for role in await cursor.fetchall()]
 
-    async def get_user_right(self, role: str) -> Tuple:
+    async def get_user_right(self, user_id) -> Tuple:
         """Получение словаря с правами роли"""
 
         async with self.db._connection.execute(
-            "SELECT rr.permission_name, definition FROM RoleRights rr JOIN (RightsDefinitions) WHERE rr.permission_name=name AND role_name=?",
-            (role,),
+            "SELECT rr.permission_name, definition, role_fk FROM RoleRights rr JOIN (RightsDefinitions rd, Users us) WHERE role_fk=role_name AND rr.permission_name=rd.name AND us.telegram_id=?",
+            (user_id,),
         ) as cursor:
             return await cursor.fetchall()
 
@@ -100,7 +82,7 @@ class User:
         if user_data:
             _, self.name, self.surname, self.department, self.role = user_data
 
-            self.rights = await self.repository.get_user_right(self.role)
+            self.rights = await self.repository.get_user_right()
 
     async def is_registered(self) -> bool:
         return bool(await self.repository.get_user(self.telegram_id))
@@ -109,7 +91,7 @@ class User:
         return self.__dict__
 
     async def get_user_rigths(self):
-        return await self.repository.get_user_right(self.role)
+        return await self.repository.get_user_right(self.telegram_id)
 
     async def get_roles(self):
         return await self.repository.get_roles()

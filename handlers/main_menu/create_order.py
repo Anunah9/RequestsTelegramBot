@@ -1,13 +1,12 @@
 from aiogram import F, Router
-from aiogram.filters import StateFilter
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from assets.user import UserState
-from assets.order import Order, OrderStates, AsyncOrderRepository
+from assets.order import Order, OrderStates
 from keyboards.complete_create_order import complete_create_order
-from keyboards.main_menu import main_menu_keybord
 from middlewares.check_user_right import CheckUserRight
 
+# TODO Отправлять инлайн клавиатуру с отделами
+# TODO Добавить инлайн кнопку для завершения ввода
 
 router = Router()
 router.message.middleware(CheckUserRight("create_order"))

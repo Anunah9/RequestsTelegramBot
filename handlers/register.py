@@ -90,5 +90,5 @@ async def end_registration(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.answer(
         text="Спасибо за регистрацию.\nПриятного пользования",
-        reply_markup=main_menu_keybord,
+        reply_markup=await main_menu_keybord(),
     )
