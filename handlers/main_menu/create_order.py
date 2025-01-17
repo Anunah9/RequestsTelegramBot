@@ -3,6 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from assets.order import Order, OrderStates
 from keyboards.complete_create_order import complete_create_order
+from keyboards.choose_departments import choose_departments_keyboard
 from middlewares.check_user_right import CheckUserRight
 
 # TODO Отправлять инлайн клавиатуру с отделами
@@ -21,7 +22,10 @@ async def create_order(message: Message, state: FSMContext):
 @router.message(OrderStates.set_text)
 async def set_order_text(message: Message, state: FSMContext):
     await state.update_data(text=message.text)
-    await message.answer("Принято. Теперь введите пожалуйста целевый отделы")
+    await message.answer(
+        "Принято. Теперь введите пожалуйста целевый отделы",
+        reply_markup=await choose_departments_keyboard(),
+    )
     await message.answer(
         "Когда закончите вводить отделы отправьте 'Завершить' в чат.",
     )

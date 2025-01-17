@@ -14,6 +14,7 @@ class UserState(StatesGroup):
     set_department = State()
     set_role = State()
 
+
 # TODO Убрать ненужную таблицу Workers так как уже есть таблица User
 # TODO Доделать Запрос для получения прав
 # Реализация репозитория на основе AsyncDataBase
@@ -82,7 +83,7 @@ class User:
         if user_data:
             _, self.name, self.surname, self.department, self.role = user_data
 
-            self.rights = await self.repository.get_user_right()
+            self.rights = await self.repository.get_user_right(self.telegram_id)
 
     async def is_registered(self) -> bool:
         return bool(await self.repository.get_user(self.telegram_id))
