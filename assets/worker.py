@@ -10,7 +10,7 @@ class AsyncWorkerRepository:
 
     async def get_workers_list(self):
         async with self.db._connection.execute(
-            "SELECT * FROM Users WHERE role='?'", ("Рабочий")
+            "SELECT name, surname FROM Users WHERE role_fk=?", ("Рабочий",)
         ) as cursor:
             return await cursor.fetchall()
 
@@ -23,7 +23,8 @@ class AsyncWorkerRepository:
     async def get_worker_id(self, worker: str):
         """Возвращает id работника по его имени"""
         async with self.db._connection.execute(
-            "SELECT id FROM Users WHERE name=?", (worker,)
+            "SELECT telegram_id FROM Users WHERE name=? AND surname=?",
+            worker.split(" "),
         ) as cursor:
             return await cursor.fetchone()
 
@@ -50,5 +51,16 @@ class Worker:
     async def get_worker_id(self, worker):
         return await self.repository.get_worker_id(worker)
 
-    async def add_to_workers_table(self, order_id, worker_id):
-        return await self.repository.add_to_departments(order_id, worker_id)
+    async def _add_to_workers_table(self, order_id, worker_id):
+        return await self.repository.add_to_workers_table(order_id, worker_id)
+
+    async def add_to_workers(self, order_id, workers):
+        #  Получаем id каждого работника заявки
+        worker_ids = []
+        for worker in workers:
+            worker_ids.append(*await self.repository.get_worker_id(worker))
+        #  Добавляем в таблицу OrderWorkers
+        for worker_id in worker_ids:
+            await self._add_to_workers_table(order_id, worker_id)
+
+        #  Получаем id отделов

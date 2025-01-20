@@ -2,12 +2,15 @@ from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from assets.order import Order, OrderStates
+from assets.department import Department, AsyncDepartmentRepository
+from assets.worker import Worker, AsyncWorkerRepository
 from keyboards.complete_create_order import complete_create_order
 from keyboards.choose_departments import choose_departments_keyboard
+from keyboards.choose_workers import choose_workers_keyboard
 from middlewares.check_user_right import CheckUserRight
 
-# TODO Отправлять инлайн клавиатуру с отделами
-# TODO Добавить инлайн кнопку для завершения ввода
+# TODO Добавить отмену создания заявки, через команду, и через кнопку в конце создания
+# TODO Добавить отмену любого действия через команду /cancel
 
 router = Router()
 router.message.middleware(CheckUserRight("create_order"))
@@ -37,7 +40,10 @@ async def set_order_text(message: Message, state: FSMContext):
 async def set_order_departments(message: Message, state: FSMContext):
 
     if message.text == "Завершить":
-        await message.answer("Принято. Теперь введите пожалуйста работников")
+        await message.answer(
+            "Принято. Теперь введите пожалуйста работников",
+            reply_markup=await choose_workers_keyboard(),
+        )
         await message.answer(
             "Когда закончите вводить работников отправьте 'Завершить' в чат.",
         )
@@ -71,15 +77,25 @@ async def set_order_workers(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "complete_creation_order", OrderStates.set_workers)
-async def end_registration(callback: CallbackQuery, state: FSMContext):
+async def complete_creation_order(callback: CallbackQuery, state: FSMContext):
     order_data = await state.get_data()
 
     new_order = Order(
         text=order_data["text"],
-        departments=order_data["departments"],
-        workers=order_data["workers"],
     )
+
     await new_order.add_new_order()
+
+    order_id = new_order.order_id
+
+    department_rep = AsyncDepartmentRepository("./db.db")
+    department = Department(department_rep)
+    await department.add_to_departments(order_id, order_data["departments"])
+
+    worker_rep = AsyncWorkerRepository("./db.db")
+    worker = Worker(worker_rep)
+    await worker.add_to_workers(order_id, order_data["workers"])
+
     await state.clear()
     await callback.message.answer(
         text=f"Заявка добавлена\n Её ID - {new_order.order_id}\nЧтобы открыть основное меню используйте /main_menu",

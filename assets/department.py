@@ -50,5 +50,16 @@ class Department:
     async def get_department_id(self, department):
         return await self.repository.get_department_id(department)
 
-    async def add_to_departments(self, order_id, department_id):
+    async def _add_to_departments_table(self, order_id, department_id):
         return await self.repository.add_to_departments(order_id, department_id)
+
+    async def add_to_departments(self, order_id, departments):
+        department_ids = []
+        for department in departments:
+            department_ids.append(*await self.repository.get_department_id(department))
+        #  Добавляем в таблицу OrderWorkers
+        for department_id in department_ids:
+            await self._add_to_departments_table(order_id, department_id)
+        await self.repository.db.commit()
+        return 0
+

@@ -7,7 +7,7 @@ from assets.db import AsyncDataBase
 STATUSES = {1: "Создана", 2: "Отправлена", 3: "Принята", 4: "В работе", 5: "Закрыта"}
 # TODO Сделать обработку ошибок в получении id из бд
 # TODO Сделать lower() при получении id из бд
-# TODO Разобраться с получением id сотрудника по имени и фамилии
+# TODO Переделать это под инлайн кнопки и switch inline query
 
 
 class OrderStates(StatesGroup):
@@ -50,12 +50,10 @@ class AsyncOrderRepository:
 
 
 class Order:
-    def __init__(self, text, departments, workers, repository=None):
+    def __init__(self, text, repository=None):
         self.order_id: int
         self.text: str = text
-        self.departments: Union[str, list] = departments
         self.status: str = 1
-        self.workers: Union[List] = workers
         self.repository = repository or AsyncOrderRepository("./db.db")
 
     async def get_order_id(self):
@@ -77,21 +75,4 @@ class Order:
             self.order_id, self.text, current_status, created_at
         )
 
-        #  Получаем id каждого работника заявки
-        worker_ids = []
-        for worker in self.workers:
-            worker_ids.append(*await self.repository.get_worker_id(worker))
-        #  Добавляем в таблицу OrderWorkers
-        for worker_id in worker_ids:
-            await self.repository.add_to_workers_table(self.order_id, worker_id)
-
-        #  Получаем id отделов
-        department_ids = []
-        for department in self.departments:
-            department_ids.append(*await self.repository.get_department_id(department))
-        #  Добавляем в таблицу OrderWorkers
-        for department_id in department_ids:
-            await self.repository.add_to_departments(self.order_id, department_id)
-        await self.repository.db.commit()
-        return 0
-        # return await self.repository.add_new_order()
+        
