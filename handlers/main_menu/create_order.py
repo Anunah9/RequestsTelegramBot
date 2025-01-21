@@ -8,6 +8,7 @@ from keyboards.complete_create_order import complete_create_order
 from keyboards.choose_departments import choose_departments_keyboard
 from keyboards.choose_workers import choose_workers_keyboard
 from middlewares.check_user_right import CheckUserRight
+from keyboards.main_menu import main_menu_keyboard
 
 # TODO Добавить отмену создания заявки, через команду, и через кнопку в конце создания
 # TODO Добавить отмену любого действия через команду /cancel
@@ -99,4 +100,5 @@ async def complete_creation_order(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.answer(
         text=f"Заявка добавлена\n Её ID - {new_order.order_id}\nЧтобы открыть основное меню используйте /main_menu",
+        reply_markup=await main_menu_keyboard(),
     )

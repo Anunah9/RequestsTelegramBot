@@ -14,7 +14,6 @@ class UserState(StatesGroup):
     set_department = State()
     set_role = State()
 
-# TODO Разобраться с получением id сотрудника по имени и фамилии
 # TODO Убрать ненужную таблицу Workers так как уже есть таблица User
 
 # Реализация репозитория на основе AsyncDataBase

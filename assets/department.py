@@ -14,6 +14,12 @@ class AsyncDepartmentRepository:
         ) as cursor:
             return await cursor.fetchall()
 
+    async def get_departments_by_order_id(self, order_id):
+        async with self.db._connection.execute(
+            "SELECT name FROM OrdersDepartments JOIN Departments WHERE order_id=?", (order_id,)
+        ) as cursor:
+            return await cursor.fetchone()
+
     async def get_department_by_id(self, department_id):
         async with self.db._connection.execute(
             "SELECT * FROM Departments WHERE id=?", (department_id,)
@@ -43,6 +49,8 @@ class Department:
 
     async def get_department_list(self):
         return await self.repository.get_department_list()
+    
+    
 
     async def get_department_by_id(self, department_id):
         return await self.repository.get_department_by_id(department_id)

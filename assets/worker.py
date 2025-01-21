@@ -33,6 +33,8 @@ class AsyncWorkerRepository:
             "INSERT INTO OrderWorkers VALUES (?, ?)", (order_id, worker_id)
         ) as cursor:
             return await cursor.fetchone()
+        await self.db._connection.commit()
+
 
 
 class Worker:
@@ -50,6 +52,9 @@ class Worker:
 
     async def get_worker_id(self, worker):
         return await self.repository.get_worker_id(worker)
+
+    async def get_workers_by_order_id(self, order_id):
+        return await self.repository.get_workers_by_order_id(order_id)
 
     async def _add_to_workers_table(self, order_id, worker_id):
         return await self.repository.add_to_workers_table(order_id, worker_id)

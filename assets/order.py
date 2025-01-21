@@ -17,6 +17,10 @@ class OrderStates(StatesGroup):
     set_status = State()
     set_workers = State()
 
+    # Edit states
+    get_order_id = State()
+    set_edited_order_text = State()
+
 
 class AsyncOrderRepository:
     def __init__(self, db_path: str):
@@ -48,16 +52,27 @@ class AsyncOrderRepository:
         ) as cursor:
             return await cursor.fetchone()
 
+    async def edit_order_text(self, order_id, text):
+        async with self.db._connection.execute(
+            "UPDATE Orders SET text=? WHERE id=?",
+            (text, order_id),
+        ) as cursor:
+            await self.db._connection.commit()
+            return await cursor.fetchone()
+
 
 class Order:
-    def __init__(self, text, repository=None):
+    def __init__(self, text=None, repository=None):
         self.order_id: int
         self.text: str = text
         self.status: str = 1
         self.repository = repository or AsyncOrderRepository("./db.db")
 
-    async def get_order_id(self):
-        self.order_id = await self.repository.get_max_order_id() + 1
+    def set_order_text(self, text):
+        self.text = text
+
+    async def edit_text_order(self, order_id, text):
+        return await self.repository.edit_order_text(order_id, text)
 
     async def get_order_list(self) -> Optional[Tuple[int, str, str, str]]:
         return await self.repository.get_order_list_from_db()
@@ -67,12 +82,13 @@ class Order:
 
     async def add_new_order(self):
         (max_order_id,) = await self.repository.get_max_order_id()
-        self.order_id = max_order_id + 1
+        if not max_order_id:
+            self.order_id = 0
+        else:
+            self.order_id = max_order_id + 1
         current_status = 1
         created_at = datetime.datetime.now()
 
         await self.repository.add_to_orders_table(
             self.order_id, self.text, current_status, created_at
         )
-
-        
