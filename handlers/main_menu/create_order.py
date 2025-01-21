@@ -4,11 +4,11 @@ from aiogram.fsm.context import FSMContext
 from assets.order import Order, OrderStates
 from assets.department import Department, AsyncDepartmentRepository
 from assets.worker import Worker, AsyncWorkerRepository
-from keyboards.complete_create_order import complete_create_order
-from keyboards.choose_departments import choose_departments_keyboard
-from keyboards.choose_workers import choose_workers_keyboard
+from keyboards.complete_create_order_kb import complete_create_order
+from keyboards.choose_departments_kb import choose_departments_keyboard
+from keyboards.choose_workers_kb import choose_workers_keyboard
 from middlewares.check_user_right import CheckUserRight
-from keyboards.main_menu import main_menu_keyboard
+from keyboards.main_menu_kb import main_menu_keyboard
 
 # TODO Добавить отмену создания заявки, через команду, и через кнопку в конце создания
 # TODO Добавить отмену любого действия через команду /cancel
@@ -39,7 +39,6 @@ async def set_order_text(message: Message, state: FSMContext):
 
 @router.message(OrderStates.set_departments)
 async def set_order_departments(message: Message, state: FSMContext):
-
     if message.text == "Завершить":
         # await message.answer(
         #     "Принято. Теперь введите пожалуйста работников",
@@ -64,9 +63,6 @@ async def set_order_departments(message: Message, state: FSMContext):
         await state.update_data(
             departments=[*await state.get_value("departments"), message.text]
         )
-
-
-
 
 
 @router.message(OrderStates.set_workers)

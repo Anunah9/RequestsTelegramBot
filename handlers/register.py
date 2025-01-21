@@ -6,8 +6,8 @@ from aiogram.fsm.context import FSMContext
 from assets.user import UserState, User, AsyncUserRepository
 from assets.db import AsyncDataBase
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from keyboards.role_keyboard import choose_role_keyboard
-from keyboards.main_menu import main_menu_keyboard
+from keyboards.role_keyboard_kb import choose_role_keyboard
+from keyboards.main_menu_kb import main_menu_keyboard
 
 router = Router()
 

@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from assets.order import OrderStates, Order, AsyncOrderRepository
 from assets.worker import AsyncWorkerRepository, Worker
 from middlewares.check_user_right import CheckUserRight
-from keyboards.edit_order import edit_order_keyboard
+from keyboards.edit_order_kb import edit_order_keyboard
 
 
 router = Router()
