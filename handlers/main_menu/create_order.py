@@ -100,5 +100,5 @@ async def complete_creation_order(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.answer(
         text=f"Заявка добавлена\n Её ID - {new_order.order_id}\nЧтобы открыть основное меню используйте /main_menu",
-        reply_markup=await main_menu_keyboard(),
+        reply_markup=await main_menu_keyboard(callback.id),
     )

@@ -33,8 +33,17 @@ class AsyncWorkerRepository:
             "INSERT INTO OrderWorkers VALUES (?, ?)", (order_id, worker_id)
         ) as cursor:
             return await cursor.fetchone()
-        await self.db._connection.commit()
 
+    # Не доделано
+    # async def get_workers_by_order_id(order_id):
+    #     async with self.db._connection.execute(
+    #         "SELECT name, surname FROM Users WHERE name=? AND surname=?",
+    #         worker.split(" "),
+    #     ) as cursor:
+    #         return await cursor.fetchone()
+
+    async def edit_workers_by_order_id(order_id, workers):
+        pass
 
 
 class Worker:
@@ -67,5 +76,5 @@ class Worker:
         #  Добавляем в таблицу OrderWorkers
         for worker_id in worker_ids:
             await self._add_to_workers_table(order_id, worker_id)
-
+        await self.repository.db.commit()
         #  Получаем id отделов

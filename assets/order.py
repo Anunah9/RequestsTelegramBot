@@ -83,7 +83,7 @@ class Order:
     async def add_new_order(self):
         (max_order_id,) = await self.repository.get_max_order_id()
         if not max_order_id:
-            self.order_id = 0
+            self.order_id = 1
         else:
             self.order_id = max_order_id + 1
         current_status = 1
