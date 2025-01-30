@@ -3,10 +3,8 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from assets.order import Order, OrderStates
 from assets.department import Department, AsyncDepartmentRepository
-from assets.worker import Worker, AsyncWorkerRepository
 from keyboards.complete_create_order_kb import complete_create_order
 from keyboards.choose_departments_kb import choose_departments_keyboard
-from keyboards.choose_workers_kb import choose_workers_keyboard
 from middlewares.check_user_right import CheckUserRight
 from keyboards.main_menu_kb import main_menu_keyboard
 

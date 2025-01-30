@@ -20,6 +20,7 @@ class OrderStates(StatesGroup):
     # Edit states
     get_order_id = State()
     set_edited_order_text = State()
+    change_order_for_send = State()
 
 
 class AsyncOrderRepository:
@@ -74,18 +75,25 @@ class Order:
     async def edit_text_order(self, order_id, text):
         return await self.repository.edit_order_text(order_id, text)
 
-    async def get_order_list(self) -> Optional[Tuple[int, str, str, str]]:
+    async def get_order_list(self):
         return await self.repository.get_order_list_from_db()
+
+    async def get_max_order_id(self):
+        return (await self.repository.get_max_order_id())[0]
+
+    async def get_last_order(self):
+        return await self.repository.get_order_by_id(await self.get_max_order_id())
 
     async def get_order_by_id(self, order_id):
         return await self.repository.get_order_by_id(order_id=order_id)
 
     async def add_new_order(self):
-        (max_order_id,) = await self.repository.get_max_order_id()
+        max_order_id = await self.repository.get_max_order_id()
+        print(max_order_id)
         if not max_order_id:
             self.order_id = 1
         else:
-            self.order_id = max_order_id + 1
+            self.order_id = max_order_id[0] + 1
         current_status = 1
         created_at = datetime.datetime.now()
 

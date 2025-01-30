@@ -59,6 +59,8 @@ class AsyncUserRepository:
             (user_id,),
         ) as cursor:
             return await cursor.fetchall()
+        
+    
 
 
 class User:

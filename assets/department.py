@@ -16,10 +16,10 @@ class AsyncDepartmentRepository:
 
     async def get_departments_by_order_id(self, order_id):
         async with self.db._connection.execute(
-            "SELECT name FROM OrdersDepartments JOIN Departments WHERE order_id=?",
+            "SELECT department_fk, name FROM OrderDepartments JOIN Departments WHERE order_fk=? AND department_fk=id",
             (order_id,),
         ) as cursor:
-            return await cursor.fetchone()
+            return await cursor.fetchall()
 
     async def get_department_by_id(self, department_id):
         async with self.db._connection.execute(
@@ -40,6 +40,13 @@ class AsyncDepartmentRepository:
         ) as cursor:
             return await cursor.fetchone()
 
+    async def get_department_dispatcher(self, department: int):
+        async with self.db._connection.execute(
+            'SELECT telegram_id, name, surname FROM Users WHERE department_fk=? AND role_fk="Диспетчер"',
+            (department,),
+        ) as cursor:
+            return await cursor.fetchone()
+
 
 class Department:
     def __init__(self, respository):
@@ -53,6 +60,9 @@ class Department:
 
     async def get_department_by_id(self, department_id):
         return await self.repository.get_department_by_id(department_id)
+
+    async def get_departments_by_order_id(self, order_id):
+        return await self.repository.get_departments_by_order_id(order_id)
 
     async def get_department_id(self, department):
         return await self.repository.get_department_id(department)
@@ -69,3 +79,6 @@ class Department:
             await self._add_to_departments_table(order_id, department_id)
         await self.repository.db.commit()
         return 0
+
+    async def get_department_dispatcher(self, department: int):
+        return await self.repository.get_department_dispatcher(department)
