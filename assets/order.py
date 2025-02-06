@@ -61,6 +61,14 @@ class AsyncOrderRepository:
             await self.db._connection.commit()
             return await cursor.fetchone()
 
+    async def change_order_status(self, order_id, status):
+        async with self.db._connection.execute(
+            "UPDATE Orders SET status=? WHERE id=?",
+            (status, order_id),
+        ) as cursor:
+            await self.db._connection.commit()
+            return await cursor.fetchone()
+
 
 class Order:
     def __init__(self, text=None, repository=None):
@@ -74,6 +82,9 @@ class Order:
 
     async def edit_text_order(self, order_id, text):
         return await self.repository.edit_order_text(order_id, text)
+
+    async def change_order_status(self, order_id, status):
+        return await self.repository.change_order_status(order_id, status)
 
     async def get_order_list(self):
         return await self.repository.get_order_list_from_db()

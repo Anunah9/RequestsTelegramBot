@@ -1,3 +1,4 @@
+from typing import Optional
 from keyboards.complete_create_order_kb import complete_create_order
 from keyboards.choose_departments_kb import choose_departments_keyboard
 from middlewares.check_user_right import CheckUserRight
@@ -5,9 +6,10 @@ from keyboards.main_menu_kb import main_menu_keyboard
 from aiogram.fsm.context import FSMContext
 from assets.department import Department, AsyncDepartmentRepository
 from aiogram.types import Message, CallbackQuery
+from aiogram.filters.callback_data import CallbackData
 from assets.order import AsyncOrderRepository, Order, OrderStates
 from aiogram import F, Router
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 router = Router()
 router.message.middleware(CheckUserRight("send_order"))
@@ -83,16 +85,44 @@ async def complete_creation_order(callback: CallbackQuery, state: FSMContext):
         target = await department.get_department_dispatcher(department_id)
         print(target)
         if target:
-            try:
-                # Распаковываем данные диспетчера
-                telegram_id, name, surname = target
-                print(telegram_id, name, surname)
-                # Отправляем сообщение
-                await callback.message.bot.send_message(
-                    chat_id=telegram_id, text=message_text
-                )
-            except Exception as e:
-                print(f"Ошибка отправки сообщения {telegram_id}: {e}")
+            # try:
+            # Распаковываем данные диспетчера
+            telegram_id, name, surname = target
+            print(telegram_id, name, surname)
+            print(order_info[0])
+            # Отправляем сообщение
+            await callback.message.bot.send_message(
+                chat_id=telegram_id,
+                text=message_text,
+                reply_markup=InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [
+                            InlineKeyboardButton(
+                                text="Подтвердить получение",
+                                callback_data=ConfirmRecieptCallbackFactory(
+                                    order_id=order_info[0]
+                                ).pack(),
+                            )
+                        ]
+                    ]
+                ),
+            )
+        # except Exception as e:
+        #     print(f"Ошибка отправки сообщения {telegram_id}: {e}")
 
     await state.clear()
     await callback.answer("Заявка успешно отправлена!")
+
+
+class ConfirmRecieptCallbackFactory(CallbackData, prefix="confirm_receipt"):
+    order_id: Optional[int] = None
+
+
+@router.callback_query(ConfirmRecieptCallbackFactory.filter())
+async def confirm_receipt(
+    callback: CallbackQuery, callback_data: ConfirmRecieptCallbackFactory
+):
+    repository = AsyncOrderRepository("./db.db")
+    order = Order(repository=repository)
+    await order.change_order_status(callback_data.order_id, status=2)
+    await callback.answer("Готово")

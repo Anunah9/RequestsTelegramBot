@@ -5,6 +5,7 @@ from assets.order import OrderStates, Order, AsyncOrderRepository
 from assets.worker import AsyncWorkerRepository, Worker
 from middlewares.check_user_right import CheckUserRight
 from keyboards.edit_order_kb import edit_order_keyboard
+from keyboards.main_menu_kb import main_menu_keyboard
 
 
 router = Router()
@@ -45,8 +46,11 @@ async def complete_edit_order_text(message: Message, state: FSMContext):
     order = data["order"]
     await order.edit_text_order(data["order_id"], message.text)
     text = await order.get_order_by_id(data["order_id"])
-    await message.answer(f"Текст заявки: {text[1]}")
-
+    await message.answer(
+        f"Текст заявки: {text[1]}",
+        reply_markup=await main_menu_keyboard(message.chat.id),
+    )
+    await state.clear()
 
 
 ## TODO Доделать
