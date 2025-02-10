@@ -1,6 +1,6 @@
 from aiogram import Router
-from aiogram.filters import Command
 from aiogram.types import Message
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from keyboards.main_menu_kb import main_menu_keyboard
 

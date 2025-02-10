@@ -1,6 +1,7 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
+from assets.logger import logger
 from keyboards.main_menu_kb import main_menu_keyboard
 from assets.user import User
 from handlers import register
@@ -13,6 +14,7 @@ router.include_router(register.router)
 
 @router.message(Command("start"))
 async def greet_new_user(message: Message, state: FSMContext):
+    logger.info(str(message.chat.id) + " " + message.text)
     greeting_text = f"Добрый день, {message.chat.username}, этот бот предназначен для работы с заявками."
     await message.answer(
         greeting_text,

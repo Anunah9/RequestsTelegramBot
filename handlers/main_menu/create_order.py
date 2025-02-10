@@ -1,15 +1,13 @@
-from aiogram import F, Router
-from aiogram.types import Message, CallbackQuery
-from aiogram.fsm.context import FSMContext
-from assets.order import Order, OrderStates
-from assets.department import Department, AsyncDepartmentRepository
 from keyboards.complete_create_order_kb import complete_create_order
 from keyboards.choose_departments_kb import choose_departments_keyboard
 from middlewares.check_user_right import CheckUserRight
 from keyboards.main_menu_kb import main_menu_keyboard
+from aiogram.fsm.context import FSMContext
+from assets.department import Department, AsyncDepartmentRepository
+from aiogram.types import Message, CallbackQuery
+from assets.order import Order, OrderStates
+from aiogram import F, Router
 
-# TODO Добавить отмену создания заявки, через команду, и через кнопку в конце создания
-# TODO Добавить отмену любого действия через команду /cancel
 
 router = Router()
 router.message.middleware(CheckUserRight("create_order"))

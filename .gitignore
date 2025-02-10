@@ -3,3 +3,4 @@ OrderPathDiagramm.drawio
 .env
 __pycache__
 db.db
+log.log
