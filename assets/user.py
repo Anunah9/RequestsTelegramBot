@@ -14,7 +14,9 @@ class UserState(StatesGroup):
     set_department = State()
     set_role = State()
 
+
 # TODO Убрать ненужную таблицу Workers так как уже есть таблица User
+
 
 # Реализация репозитория на основе AsyncDataBase
 class AsyncUserRepository:
@@ -59,8 +61,6 @@ class AsyncUserRepository:
             (user_id,),
         ) as cursor:
             return await cursor.fetchall()
-        
-    
 
 
 class User:
@@ -75,6 +75,7 @@ class User:
         self.role: str
         self.rights: Tuple
         self.repository = AsyncUserRepository("./db.db")
+        self.subdivision: int
 
     async def connect(self):
         await self.repository.connect()
@@ -82,7 +83,9 @@ class User:
     async def update_user_info_from_db(self):
         user_data = await self.repository.get_user(self.telegram_id)
         if user_data:
-            _, self.name, self.surname, self.department, self.role = user_data
+            _, self.name, self.surname, self.role, self.department, self.subdivision = (
+                user_data
+            )
 
             self.rights = await self.repository.get_user_right(self.telegram_id)
 

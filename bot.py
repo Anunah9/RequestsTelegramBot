@@ -10,16 +10,24 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from handlers import start, cancel, help
 from handlers.main_menu import create_order, main_menu, edit_order, send_order
 from assets.logger import logger
+import yaml
 
-
-dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
+def load_token_from_yaml(file_path: str) -> str:
+    """Загружает TOKEN из YAML-файла."""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = yaml.safe_load(file)
+            return data.get("TOKEN", "")
+    except FileNotFoundError:
+        print("Файл не найден.")
+    except yaml.YAMLError as e:
+        print(f"Ошибка при чтении YAML: {e}")
+    return ""
 
 
 async def main() -> None:
+    TOKEN = load_token_from_yaml("config.yaml")
 
-    TOKEN = os.getenv("TOKEN")
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=MemoryStorage())
     

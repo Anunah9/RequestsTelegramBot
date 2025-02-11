@@ -7,7 +7,7 @@ from assets.user import UserState, User, AsyncUserRepository
 from assets.db import AsyncDataBase
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.role_keyboard_kb import choose_role_keyboard
-from keyboards.main_menu_kb import main_menu_keyboard
+from keyboards.main_menu_kb import main_menu_kb
 
 router = Router()
 
@@ -90,5 +90,5 @@ async def end_registration(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.answer(
         text="Спасибо за регистрацию.\nПриятного пользования",
-        reply_markup=await main_menu_keyboard(),
+        reply_markup=await main_menu_kb(),
     )

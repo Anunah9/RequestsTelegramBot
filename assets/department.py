@@ -1,5 +1,6 @@
 from assets.db import AsyncDataBase
 
+#TODO Наследовать классы worker, department, subdivision от одного абстрактного класса
 
 class AsyncDepartmentRepository:
     def __init__(self, db_path: str):
@@ -64,7 +65,7 @@ class Department:
     async def get_departments_by_order_id(self, order_id):
         return await self.repository.get_departments_by_order_id(order_id)
 
-    async def get_department_id(self, department):
+    async def get_id_by_name(self, department):
         return await self.repository.get_department_id(department)
 
     async def _add_to_departments_table(self, order_id, department_id):
@@ -80,5 +81,5 @@ class Department:
         await self.repository.db.commit()
         return 0
 
-    async def get_department_dispatcher(self, department: int):
+    async def get_info_by_id(self, department: int):
         return await self.repository.get_department_dispatcher(department)

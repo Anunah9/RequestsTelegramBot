@@ -4,3 +4,4 @@ OrderPathDiagramm.drawio
 __pycache__
 db.db
 log.log
+config.yaml

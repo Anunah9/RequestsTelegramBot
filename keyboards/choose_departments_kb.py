@@ -3,7 +3,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from assets.department import Department, AsyncDepartmentRepository
 
 
-async def choose_departments_keyboard():
+async def choose_departments_kb():
     repository = AsyncDepartmentRepository("./db.db")
     await repository.connect()
     department = Department(respository=repository)

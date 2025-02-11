@@ -1,13 +1,19 @@
 import datetime
 import random
-from typing import List, Optional, Tuple, Union
 from aiogram.fsm.state import StatesGroup, State
 from assets.db import AsyncDataBase
 
-STATUSES = {1: "Создана", 2: "Отправлена", 3: "Принята", 4: "В работе", 5: "Закрыта"}
+STATUSES = {
+    1: "Создана",
+    2: "Отправлена",
+    3: "Принята",
+    4: "Отправлена главам подразделений",
+    5: "В работе",
+    6: "Закрыта",
+}
 # TODO Сделать обработку ошибок в получении id из бд
 # TODO Сделать lower() при получении id из бд
-# TODO Переделать это под инлайн кнопки и switch inline query
+
 
 
 class OrderStates(StatesGroup):
@@ -21,6 +27,9 @@ class OrderStates(StatesGroup):
     get_order_id = State()
     set_edited_order_text = State()
     change_order_for_send = State()
+    set_subdivisions = State()
+
+    waiting_for_order_id = State()
 
 
 class AsyncOrderRepository:
@@ -42,15 +51,23 @@ class AsyncOrderRepository:
         ) as cursor:
             return await cursor.fetchone()
 
+    async def get_order_list_from_db(self, status):
+        async with self.db._connection.execute(
+            f"SELECT * FROM Orders WHERE status={status}"
+        ) as cursor:
+            return await cursor.fetchone()
+
     async def get_max_order_id(self):
         async with self.db._connection.execute("SELECT MAX(id) FROM Orders") as cursor:
-            return await cursor.fetchone()
+            res = await cursor.fetchone()
+            return res[0] if res else 0
 
     async def add_to_orders_table(self, order_id, text, status, created_at):
         async with self.db._connection.execute(
             "INSERT INTO Orders VALUES (?, ?, ?, ?)",
             (order_id, text, status, created_at),
         ) as cursor:
+            await self.db._connection.commit()
             return await cursor.fetchone()
 
     async def edit_order_text(self, order_id, text):
@@ -86,14 +103,13 @@ class Order:
     async def change_order_status(self, order_id, status):
         return await self.repository.change_order_status(order_id, status)
 
-    async def get_order_list(self):
-        return await self.repository.get_order_list_from_db()
+    async def get_order_list(self, status=1):
+        """Возвращает список всех заявок с заданным статусом.
+        По умолчанию возвращает не отправленные заявки"""
+        return await self.repository.get_order_list_from_db(status)
 
     async def get_max_order_id(self):
-        return (await self.repository.get_max_order_id())[0]
-
-    async def get_last_order(self):
-        return await self.repository.get_order_by_id(await self.get_max_order_id())
+        return await self.repository.get_max_order_id()
 
     async def get_order_by_id(self, order_id):
         return await self.repository.get_order_by_id(order_id=order_id)
@@ -104,7 +120,7 @@ class Order:
         if not max_order_id:
             self.order_id = 1
         else:
-            self.order_id = max_order_id[0] + 1
+            self.order_id = max_order_id + 1
         current_status = 1
         created_at = datetime.datetime.now()
 

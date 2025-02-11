@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from assets.user import User
 
 
-async def main_menu_keyboard(user_id) -> ReplyKeyboardMarkup:
+async def main_menu_kb(user_id) -> ReplyKeyboardMarkup:
     """Клавиатура основного меню для пользователя"""
     print(user_id)
     user = User(user_id)

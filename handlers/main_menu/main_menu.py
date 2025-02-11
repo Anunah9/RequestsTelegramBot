@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
-from keyboards.main_menu_kb import main_menu_keyboard
+from keyboards.main_menu_kb import main_menu_kb
 from assets.user import User
 
 router = Router()
@@ -11,5 +11,5 @@ router = Router()
 async def main_menu_handler(message: Message):
     await message.answer(
         text="Выберите действие.",
-        reply_markup=await main_menu_keyboard(message.chat.id),
+        reply_markup=await main_menu_kb(message.chat.id),
     )

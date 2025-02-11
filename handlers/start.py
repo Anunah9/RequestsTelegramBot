@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
 from assets.logger import logger
-from keyboards.main_menu_kb import main_menu_keyboard
+from keyboards.main_menu_kb import main_menu_kb
 from assets.user import User
 from handlers import register
 from aiogram.fsm.context import FSMContext
@@ -32,5 +32,5 @@ async def greet_new_user(message: Message, state: FSMContext):
         await user.update_user_info_from_db()
         registered_text = f"Добро пожаловать {user.surname} {user.name}"
         await message.answer(
-            registered_text, reply_markup=await main_menu_keyboard(user.telegram_id)
+            registered_text, reply_markup=await main_menu_kb(user.telegram_id)
         )
