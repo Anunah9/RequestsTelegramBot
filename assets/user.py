@@ -13,6 +13,8 @@ class UserState(StatesGroup):
     set_surname = State()
     set_department = State()
     set_role = State()
+    set_subdivision = State()
+    end_registration = State()
 
 
 # TODO Убрать ненужную таблицу Workers так как уже есть таблица User
@@ -36,13 +38,13 @@ class AsyncUserRepository:
 
     async def __add_user_to_db(self, user_obj: Tuple):
         await self.db._connection.execute(
-            "INSERT INTO Users VALUES (?, ?, ?, ?, ?)", user_obj
+            "INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?)", user_obj
         )
         await self.db._connection.commit()
 
     async def register_user(self, user_obj: Tuple) -> bool:
         """Функция регистрации нового пользователя"""
-        if all([bool(i) for i in user_obj]):
+        if all([bool(1 if i == 0 else i) for i in user_obj]):
             await self.__add_user_to_db(user_obj)
             return True
         else:

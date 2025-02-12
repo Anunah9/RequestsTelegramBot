@@ -3,11 +3,11 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from assets.subdivision import Subdivision, AsyncSubdivisionRepository
 
 
-async def choose_subdivisions_kb():
+async def choose_subdivisions_kb(department_id: int):
     repository = AsyncSubdivisionRepository("./db.db")
     await repository.connect()
     subdivision = Subdivision(respository=repository)
-    subdivision_list = await subdivision.get_subdivision_list()
+    subdivision_list = await subdivision.get_subdivision_list(department_id)
     builder = ReplyKeyboardBuilder()
     for btn in subdivision_list:
         builder.add(KeyboardButton(text=btn[1]))

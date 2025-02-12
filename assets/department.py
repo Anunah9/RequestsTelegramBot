@@ -1,6 +1,7 @@
 from assets.db import AsyncDataBase
 
-#TODO Наследовать классы worker, department, subdivision от одного абстрактного класса
+# TODO Наследовать классы worker, department, subdivision от одного абстрактного класса
+
 
 class AsyncDepartmentRepository:
     def __init__(self, db_path: str):
@@ -9,7 +10,7 @@ class AsyncDepartmentRepository:
     async def connect(self):
         await self.db.connect()
 
-    async def get_department_list(self):
+    async def get_department_list(self) -> dict:
         async with self.db._connection.execute(
             "SELECT * FROM Departments",
         ) as cursor:
@@ -56,7 +57,7 @@ class Department:
     async def connect(self):
         self.repository.connect()
 
-    async def get_department_list(self):
+    async def get_department_list(self) -> dict:
         return await self.repository.get_department_list()
 
     async def get_department_by_id(self, department_id):
@@ -67,6 +68,9 @@ class Department:
 
     async def get_id_by_name(self, department):
         return await self.repository.get_department_id(department)
+
+    async def check_department_name(self, name):
+        return bool(await self.repository.get_department_id(name))
 
     async def _add_to_departments_table(self, order_id, department_id):
         return await self.repository.add_to_departments(order_id, department_id)

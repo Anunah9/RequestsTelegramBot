@@ -147,7 +147,7 @@ async def process_selected_order(
         if "subdivisions" not in user_data.keys():
             await message.answer(
                 "Введите отделы, если закончили введите Завершить.",
-                reply_markup=await choose_subdivisions_kb(),
+                reply_markup=await choose_subdivisions_kb(user_department_id),
             )
             await state.set_state(OrderStates.set_subdivisions)
         else:
