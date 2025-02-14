@@ -62,6 +62,7 @@ async def input_name(message: Message, state: FSMContext):
     register_obj = Registration()
     await state.update_data(register_obj=register_obj)
     await state.update_data(name=message.text)
+    
     # Переходим к следующему шагу
     await message.answer("Принято. Теперь введите пожалуйста вашу фамилию.")
     await state.set_state(UserState.set_surname)

@@ -7,15 +7,18 @@ from assets.department import Department, AsyncDepartmentRepository
 from aiogram.types import Message, CallbackQuery
 from assets.order import Order, OrderStates
 from aiogram import F, Router
-
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 router = Router()
 router.message.middleware(CheckUserRight("create_order"))
 
 
 @router.message(F.text == "Создать заявку")
-async def create_order(message: Message, state: FSMContext):
-    await message.answer("Вы в функции создания заявки\nВведите текст заявки")
+async def create_order(message: Message, state: FSMContext, user_role, user_department):
+    await state.update_data(
+        {"user_role": user_role, "user_department": user_department}
+    )
+    await message.answer("Введите текст заявки")
     await state.set_state(OrderStates.set_text)
 
 
@@ -29,16 +32,32 @@ async def set_order_text(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "complete_creation_order", OrderStates.set_text)
-async def complete_creation_order(callback: CallbackQuery, state: FSMContext):
+async def complete_creation_order(
+    callback: CallbackQuery,
+    state: FSMContext,
+):
     order_data = await state.get_data()
-
     new_order = Order(
         text=order_data["text"],
     )
     await new_order.add_new_order()
-    await state.clear()
+    await state.update_data(selected_order_id=new_order.order_id)
     await callback.message.answer(
-        text=f"Заявка добавлена\n Её ID - {new_order.order_id}\nЧтобы открыть основное меню используйте /main_menu",
-        reply_markup=await main_menu_kb(callback.from_user.id),
+        text=f"Заявка добавлена\n Её ID - {new_order.order_id}",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="Отправить заявку",
+                        callback_data="send_order_from_creation_order",
+                    )
+                ]
+            ]
+        ),
     )
-    await callback.answer()
+
+    # await callback.message.answer(
+    #     text="", reply_markup=await main_menu_kb(callback.from_user.id)
+    # )
+    # await state.clear()
+    await callback.answer(reply_markup=await main_menu_kb(callback.from_user.id))

@@ -1,5 +1,6 @@
 import datetime
 import random
+from typing import Optional
 from aiogram.fsm.state import StatesGroup, State
 from assets.db import AsyncDataBase
 
@@ -13,7 +14,6 @@ STATUSES = {
 }
 # TODO Сделать обработку ошибок в получении id из бд
 # TODO Сделать lower() при получении id из бд
-
 
 
 class OrderStates(StatesGroup):
@@ -51,11 +51,16 @@ class AsyncOrderRepository:
         ) as cursor:
             return await cursor.fetchone()
 
-    async def get_order_list_from_db(self, status):
-        async with self.db._connection.execute(
-            f"SELECT * FROM Orders WHERE status={status}"
-        ) as cursor:
-            return await cursor.fetchone()
+    async def get_order_list_from_db(
+        self, status: Optional[int] = None, department: Optional[int] = None
+    ):
+
+        query = "SELECT * FROM Orders"
+        query += f"WHERE status ={status}" if status else ""
+        query += f"AND department={department}" if department else ""
+        print(query)
+        async with self.db._connection.execute(query) as cursor:
+            return await cursor.fetchall()
 
     async def get_max_order_id(self):
         async with self.db._connection.execute("SELECT MAX(id) FROM Orders") as cursor:
@@ -103,10 +108,12 @@ class Order:
     async def change_order_status(self, order_id, status):
         return await self.repository.change_order_status(order_id, status)
 
-    async def get_order_list(self, status=1):
-        """Возвращает список всех заявок с заданным статусом.
-        По умолчанию возвращает не отправленные заявки"""
-        return await self.repository.get_order_list_from_db(status)
+    async def get_order_list(
+        self, status: Optional[int] = None, deparment: Optional[int] = None
+    ):
+        """Возвращает список всех заявок с заданным статусом и по заданному отделу.
+        По умолчанию возвращает все заявки"""
+        return await self.repository.get_order_list_from_db(status, deparment)
 
     async def get_max_order_id(self):
         return await self.repository.get_max_order_id()

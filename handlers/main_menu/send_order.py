@@ -98,13 +98,17 @@ async def process_manual_order_id(
     await process_selected_order(message, state)
 
 
-async def process_selected_order(
-    message: Message,
-    state: FSMContext,
-):
+@router.callback_query(F.data == "send_order_from_creation_order")
+async def process_selected_order_inline_btn(callback: CallbackQuery, state: FSMContext):
+    await process_selected_order(message=callback.message, state=state)
+    await callback.answer()
+
+
+async def process_selected_order(message: Message, state: FSMContext):
     """Обрабатывает заявку после выбора пользователем"""
 
     user_data = await state.get_data()
+    print("---------------", user_data)
     user_role = user_data.get("user_role")
     user_department_id, user_department = user_data.get("user_department")
     order_id = user_data.get("selected_order_id")
