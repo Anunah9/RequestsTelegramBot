@@ -3,7 +3,6 @@ from keyboards.choose_departments_kb import choose_departments_kb
 from middlewares.check_user_right import CheckUserRight
 from keyboards.main_menu_kb import main_menu_kb
 from aiogram.fsm.context import FSMContext
-from assets.department import Department, AsyncDepartmentRepository
 from aiogram.types import Message, CallbackQuery
 from assets.order import Order, OrderStates
 from aiogram import F, Router

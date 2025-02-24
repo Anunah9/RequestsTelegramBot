@@ -129,7 +129,7 @@ async def process_selected_order(message: Message, state: FSMContext):
             ]
         ]
     )
-
+    # TODO Разделить и вынести в отдельную функцию
     if user_role == "Диспетчер" and user_department == "Центральное Хозяйство":
         if "departments" not in user_data.keys():
             await message.answer(
@@ -138,6 +138,7 @@ async def process_selected_order(message: Message, state: FSMContext):
             )
             await state.set_state(OrderStates.set_departments)
         else:
+
             await state.update_data(target="departments")
             await message.answer(
                 f"Выбранные отделы: {user_data.get("departments")}",
@@ -170,17 +171,24 @@ async def enter_send_function(
     await ask_order_selection(message)
 
 
-###########################################--UNDER CONSTRACTION--###################################################
-
-
 async def send_to_departments_dispatcher(callback: CallbackQuery, state: FSMContext):
     repository = AsyncDepartmentRepository("./db.db")
     department_obj = Department(repository)
 
     data = await state.get_data()
     order_info = data["order"]
+    order_id, text, status, created_at = order_info
+    message_text = (
+        f"ID заявки {order_id}\n"
+        f"Текст заявки: {text}\n"
+        f"Статус заявки: {status}\n"
+        f"Заявка создана: {created_at}"
+    )
+    # message_text = f"Текущая заявка:\n{order_info}"
 
-    message_text = f"Текущая заявка:\n{order_info}"
+    await department_obj.add_to_departments(
+        order_id, departments=data.get("departments")
+    )
 
     for department in data.get("departments"):
         department_id = await department_obj.get_id_by_name(department)
@@ -221,8 +229,19 @@ async def send_to_subdivisions_workers(callback: CallbackQuery, state: FSMContex
     # Формируем текст сообщения
     data = await state.get_data()
     order_info = data["order"]
-    message_text = f"Текущая заявка:\n{order_info}"
+    order_id, text, status, created_at = order_info
+    message_text = (
+        f"ID заявки {order_id}\n"
+        f"Текст заявки: {text}\n"
+        f"Статус заявки: {status}\n"
+        f"Заявка создана: {created_at}"
+    )
+
+    await subdivision_obj.add_to_subdivisions(
+        order_id, subdivisions=data.get("subdivisions")
+    )
     user_department_id, user_deparment_name = data.get("user_department")
+
     for subdivision_name in data.get("subdivisions"):
         subdivision_id = await subdivision_obj.get_id_by_name(subdivision_name)
         if subdivision_id:
