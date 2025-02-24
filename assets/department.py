@@ -42,10 +42,10 @@ class AsyncDepartmentRepository:
         ) as cursor:
             return await cursor.fetchone()
 
-    async def get_department_dispatcher(self, department: int):
+    async def get_department_dispatcher(self, department_id: int):
         async with self.db._connection.execute(
             'SELECT telegram_id, name, surname FROM Users WHERE department_fk=? AND role_fk="Диспетчер"',
-            (department,),
+            (department_id,),
         ) as cursor:
             return await cursor.fetchone()
 
@@ -85,5 +85,5 @@ class Department:
         await self.repository.db.commit()
         return 0
 
-    async def get_info_by_id(self, department: int):
-        return await self.repository.get_department_dispatcher(department)
+    async def get_department_dispatcher(self, department_id: int):
+        return await self.repository.get_department_dispatcher(department_id)

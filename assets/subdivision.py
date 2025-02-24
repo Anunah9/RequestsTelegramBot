@@ -40,10 +40,12 @@ class AsyncSubdivisionRepository:
         ) as cursor:
             return await cursor.fetchone()
 
-    async def get_subdivision_worker(self, subdivision: int, department: int):
+    async def get_subdivision_worker(
+        self, subdivision: int, department: int, role: str
+    ):
         async with self.db._connection.execute(
-            "SELECT telegram_id, name, surname FROM Users WHERE subdivision_fk=? AND department_fk=?",
-            (subdivision, department),
+            "SELECT telegram_id, name, surname FROM Users WHERE subdivision_fk=? AND department_fk=? AND role_fk=?",
+            (subdivision, department, role),
         ) as cursor:
             return await cursor.fetchone()
 
@@ -85,5 +87,11 @@ class Subdivision:
         await self.repository.db.commit()
         return 0
 
-    async def get_info_by_id(self, subdivision: int, department: int):
-        return await self.repository.get_subdivision_worker(subdivision, department)
+    async def get_subdivision_worker(
+        self, subdivision: int, department: int, role: str
+    ):
+        """Возвращает работника подразделения из выбранного отдела."""
+        # TODO Добавить выбор должности
+        return await self.repository.get_subdivision_worker(
+            subdivision, department, role
+        )

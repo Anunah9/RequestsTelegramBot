@@ -29,9 +29,12 @@ async def set_order_text(message: Message, state: FSMContext):
         f"Текст заявки: {message.text}\n",
         reply_markup=complete_create_order_kb(),
     )
+    await state.set_state(OrderStates.end_creation_order)
 
 
-@router.callback_query(F.data == "complete_creation_order", OrderStates.set_text)
+@router.callback_query(
+    F.data == "complete_creation_order", OrderStates.end_creation_order
+)
 async def complete_creation_order(
     callback: CallbackQuery,
     state: FSMContext,

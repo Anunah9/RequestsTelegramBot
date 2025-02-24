@@ -188,7 +188,7 @@ async def send_to_departments_dispatcher(callback: CallbackQuery, state: FSMCont
             department_id = department_id[0]
         else:
             print("пошел нахуй")
-        target = await department_obj.get_info_by_id(department_id)
+        target = await department_obj.get_department_dispatcher(department_id)
         print(target)
         if target:
             # try:
@@ -229,34 +229,36 @@ async def send_to_subdivisions_workers(callback: CallbackQuery, state: FSMContex
             subdivision_id = subdivision_id[0]
         else:
             print("пошел нахуй")
-
-        target = await subdivision_obj.get_info_by_id(
-            subdivision_id, user_department_id
-        )
-        print(target)
-        if target:
-            # try:
-            # Распаковываем данные диспетчера
-            telegram_id, name, surname = target
-            print(telegram_id, name, surname)
-            print(order_info[0])
-            # Отправляем сообщение
-            await callback.message.bot.send_message(
-                chat_id=telegram_id,
-                text=message_text,
-                reply_markup=InlineKeyboardMarkup(
-                    inline_keyboard=[
-                        [
-                            InlineKeyboardButton(
-                                text="Подтвердить получение",
-                                callback_data=ConfirmRecieptCallbackFactory(
-                                    order_id=order_info[0]
-                                ).pack(),
-                            )
-                        ]
-                    ]
-                ),
+        # TODO Много таргетов
+        targets_names = ["Начальник сектора", "Начальник участка"]
+        for target_name in targets_names:
+            target = await subdivision_obj.get_subdivision_worker(
+                subdivision_id,
+                user_department_id,
+                target_name,
             )
+            print(target)
+            if target:
+                telegram_id, name, surname = target
+                print(telegram_id, name, surname)
+                print(order_info[0])
+                # Отправляем сообщение
+                await callback.message.bot.send_message(
+                    chat_id=telegram_id,
+                    text=message_text,
+                    reply_markup=InlineKeyboardMarkup(
+                        inline_keyboard=[
+                            [
+                                InlineKeyboardButton(
+                                    text="Подтвердить получение",
+                                    callback_data=ConfirmRecieptCallbackFactory(
+                                        order_id=order_info[0]
+                                    ).pack(),
+                                )
+                            ]
+                        ]
+                    ),
+                )
 
 
 @router.callback_query(F.data == "confirm_send")

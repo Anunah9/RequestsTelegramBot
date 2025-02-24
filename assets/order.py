@@ -19,6 +19,7 @@ STATUSES = {
 class OrderStates(StatesGroup):
     # Состояния для работы с заявками
     set_text = State()
+    end_creation_order = State()
     set_departments = State()
     set_status = State()
     set_workers = State()
