@@ -6,8 +6,8 @@ def edit_order_keyboard():
     builder = InlineKeyboardBuilder()
     editable = [
         ("Текст заявки", "edit_text"),
-        ("Отделы", "edit_departments"),
-        ("Работники", "edit_workers"),
+        # ("Отделы", "edit_departments"),
+        # ("Работники", "edit_workers"),
     ]
     for btn in editable:
         builder.add(InlineKeyboardButton(text=btn[0], callback_data=btn[1]))

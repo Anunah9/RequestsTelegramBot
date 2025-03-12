@@ -42,7 +42,7 @@ class AsyncWorkerRepository:
     #     ) as cursor:
     #         return await cursor.fetchone()
 
-    async def edit_workers_by_order_id(order_id, workers):
+    async def edit_workers_by_order_id(self, order_id, workers):
         pass
 
 
@@ -51,7 +51,7 @@ class Worker:
         self.repository: AsyncWorkerRepository = respository
 
     async def connect(self):
-        self.repository.connect()
+        await self.repository.connect()
 
     async def get_workers_list(self):
         return await self.repository.get_workers_list()

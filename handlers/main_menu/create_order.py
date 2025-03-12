@@ -40,6 +40,7 @@ async def complete_creation_order(
 ):
     order_data = await state.get_data()
     new_order = Order(
+        callback.message.chat.id,
         text=order_data["text"],
     )
     await new_order.add_new_order()

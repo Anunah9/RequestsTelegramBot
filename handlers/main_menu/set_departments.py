@@ -14,9 +14,10 @@ async def set_departments(message: Message, state: FSMContext):
         await message.answer("Принято.")
         await send_order.process_selected_order(message, state)
     else:
-        if state_data.get("departments"):
+        deps = state_data.get("departments")
+        if deps:
             await state.update_data(
-                departments=[*await state.get_value("departments"), message.text]
+                departments=[*deps, message.text]
             )
         else:
             await state.update_data(

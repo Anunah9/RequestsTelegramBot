@@ -22,7 +22,8 @@ class Registration:
         self.subdivision_repo = AsyncSubdivisionRepository(self.db_path)
         self.subdivision_obj = Subdivision(self.subdivision_repo)
         self.repository = AsyncDataBase("./db.db")
-        self.user = User(self.repository)
+        self.user = User()
+
 
     def convert_to_names(self, items):
 
@@ -53,7 +54,7 @@ class Registration:
 async def cmd_registration(message: Message, state: FSMContext):
     register_obj = Registration()
     await state.update_data(register_obj=register_obj)
-    await message.answer("Для регистрации в боте введите пожалуйста свое имя:")
+    await message.answer("Для регистрации в боте введите пожалуйста свое имя (Только имя без фамилии):")
     await state.set_state(UserState.set_name)
 
 
@@ -69,7 +70,7 @@ async def input_name(message: Message, state: FSMContext):
 
 
 @router.message(UserState.set_surname, F.text)
-async def input_surname(message: Message, state: FSMContext):
+async def input_surname(message: Message, state: FSMContext, ):
     await state.update_data(surname=message.text)
 
     # Переходим к следующему шагу

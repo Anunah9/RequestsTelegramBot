@@ -1,7 +1,7 @@
 import functools
 from assets.db import AsyncDataBase
 from aiogram.fsm.state import StatesGroup, State
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Union
 import asyncio
 from abc import ABC, abstractmethod
 
@@ -22,7 +22,7 @@ class UserState(StatesGroup):
 
 # Реализация репозитория на основе AsyncDataBase
 class AsyncUserRepository:
-    db: AsyncDataBase = None
+    db: AsyncDataBase
 
     def __init__(self, db_path: str):
         self.db = AsyncDataBase(db_path)
@@ -68,7 +68,7 @@ class AsyncUserRepository:
 class User:
     def __init__(
         self,
-        telegram_id: int,
+        telegram_id: Optional[int] = None,
     ):
         self.telegram_id = telegram_id
         self.name: str

@@ -15,9 +15,10 @@ async def set_subdivisions(message: Message, state: FSMContext):
         await message.answer("Принято.")
         await send_order.process_selected_order(message, state)
     else:
-        if state_data.get("subdivisions"):
+        subs = state_data.get("subdivisions")
+        if subs:
             await state.update_data(
-                subdivisions=[*await state.get_value("subdivisions"), message.text]
+                subdivisions=[*subs, message.text]
             )
         else:
             await state.update_data(

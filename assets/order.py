@@ -68,10 +68,10 @@ class AsyncOrderRepository:
             res = await cursor.fetchone()
             return res[0] if res else 0
 
-    async def add_to_orders_table(self, order_id, text, status, created_at):
+    async def add_to_orders_table(self, order_id, text, status, created_at, created_by):
         async with self.db._connection.execute(
-            "INSERT INTO Orders VALUES (?, ?, ?, ?)",
-            (order_id, text, status, created_at),
+            "INSERT INTO Orders VALUES (?, ?, ?, ?, ?)",
+            (order_id, text, status, created_at, created_by),
         ) as cursor:
             await self.db._connection.commit()
             return await cursor.fetchone()
@@ -94,11 +94,13 @@ class AsyncOrderRepository:
 
 
 class Order:
-    def __init__(self, text=None, repository=None):
+    def __init__(self, telegram_id=None, text=None, repository=None):
+        self.created_by: int = telegram_id
         self.order_id: int
         self.text: str = text
         self.status: str = 1
         self.repository = repository or AsyncOrderRepository("./db.db")
+
 
     def set_order_text(self, text):
         self.text = text
@@ -133,5 +135,5 @@ class Order:
         created_at = datetime.datetime.now()
 
         await self.repository.add_to_orders_table(
-            self.order_id, self.text, current_status, created_at
+            self.order_id, self.text, current_status, created_at, self.created_by
         )
