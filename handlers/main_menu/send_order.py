@@ -11,6 +11,7 @@ from typing import Optional, Tuple
 
 # Импорт кастомных модулей и репозиториев
 from assets.user import User
+from handlers.cancel import main_menu_kb
 from keyboards.choose_departments_kb import choose_departments_kb
 from keyboards.choose_subdivisions_kb import choose_subdivisions_kb
 from middlewares.check_user_right import CheckUserRight
@@ -126,6 +127,11 @@ async def process_manual_order_id(
 async def handle_send_order_inline(callback: CallbackQuery, state: FSMContext):
     """Обработка нажатия кнопки отправки заявки из окна создания заявки"""
     await process_selected_order(callback.message, state)
+    await callback.bot.edit_message_reply_markup(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        reply_markup=None,
+    )
     await callback.answer()
 
 
@@ -239,7 +245,10 @@ async def notify_department(callback: CallbackQuery, state: FSMContext):
             )
 
 
-async def notify_subdivisions(callback: CallbackQuery, state: FSMContext):
+async def notify_subdivisions(
+    callback: CallbackQuery,
+    state: FSMContext,
+) -> None:
     """Уведомляет работников подразделений о заявке"""
     data = await state.get_data()
     order_info: tuple = data.get("order", ())
@@ -257,6 +266,10 @@ async def notify_subdivisions(callback: CallbackQuery, state: FSMContext):
         raise Exception(f"Empty user department: {user_department}")
     user_department_id = user_department[0]
 
+    department_repo = AsyncDepartmentRepository("./db.db")
+    department_obj = Department(department_repo)
+    # Добавляем заявку в службу определяя по службе диспетчера
+    await department_obj.add_to_departments(order_id, departments=(user_department[1],))
     # Добавляем заявку в подразделения
     await subdivision_obj.add_to_subdivisions(
         order_id, subdivisions=selected_subdivisions
@@ -306,9 +319,18 @@ async def complete_order_sending(callback: CallbackQuery, state: FSMContext):
         await notify_department(callback, state)
     elif target == "subdivisions":
         await notify_subdivisions(callback, state)
-
+    await callback.bot.edit_message_reply_markup(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        reply_markup=None,
+    )
     await state.clear()
-    await callback.answer("Заявка успешно отправлена!")
+
+    await callback.message.answer(
+        "Заявка успешно отправлена!",
+        reply_markup=await main_menu_kb(callback.message.chat.id),
+    )
+    await callback.answer()
 
 
 class ConfirmRecieptCallbackFactory(CallbackData, prefix="confirm_receipt"):
@@ -334,5 +356,9 @@ async def confirm_receipt(
     await order.change_order_status(callback_data.order_id, status=2)
     print(order_info[-1])
     await callback.message.bot.send_message(order_info[-1], order_message)
-    callback.message.reply_markup.inline_keyboard.pop()
+    await callback.bot.edit_message_reply_markup(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        reply_markup=None,
+    )
     await callback.answer("Готово")

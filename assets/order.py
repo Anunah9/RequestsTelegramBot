@@ -1,16 +1,17 @@
+from asyncio import Condition
+from collections.abc import Iterable
 import datetime
 import random
-from typing import Optional
+from sqlite3 import Row
+from typing import Dict, Optional
 from aiogram.fsm.state import StatesGroup, State
+import aiosqlite
 from assets.db import AsyncDataBase
 
 STATUSES = {
     1: "Создана",
-    2: "Отправлена",
-    3: "Принята",
-    4: "Отправлена главам подразделений",
-    5: "В работе",
-    6: "Закрыта",
+    2: "Принята",
+    3: "Закрыта",
 }
 # TODO Сделать обработку ошибок в получении id из бд
 # TODO Сделать lower() при получении id из бд
@@ -53,12 +54,21 @@ class AsyncOrderRepository:
             return await cursor.fetchone()
 
     async def get_order_list_from_db(
-        self, status: Optional[int] = None, department: Optional[int] = None
-    ):
+        self,
+        allowed_statuses: Optional[tuple] = None,
+        department: Optional[int] = None,
+        subdivision: Optional[int] = None,
+    ) -> Iterable[Row]:
 
-        query = "SELECT * FROM Orders"
-        query += f"WHERE status ={status}" if status else ""
-        query += f"AND department={department}" if department else ""
+        joins = f"JOIN {"OrderDepartments od" if department else ""} {"," if department and subdivision else ""}  {"OrderSubdivisions os" if subdivision else ""}"
+        subdivision_filter = (
+            f"os.order_fk=Orders.id AND os.subdivision_fk={subdivision}"
+        )
+        status_filter = f"status IN {allowed_statuses}"
+        department_filter = (
+            f"od.order_fk=Orders.id AND od.department_fk={department[0]} "
+        )
+        query = f"SELECT * FROM Orders {joins if subdivision or department else ""} WHERE {status_filter if allowed_statuses else ""} {"AND" if (subdivision or department) and allowed_statuses else ""} {department_filter if department else ""} {"AND" if subdivision and department else ""} {subdivision_filter if subdivision else ""}"
         print(query)
         async with self.db._connection.execute(query) as cursor:
             return await cursor.fetchall()
@@ -93,6 +103,10 @@ class AsyncOrderRepository:
             return await cursor.fetchone()
 
 
+# TODO Заменить статус на текстовое определение
+# TODO Добавить инлайн кнопку ответа на заявку
+
+
 class Order:
     def __init__(self, telegram_id=None, text=None, repository=None):
         self.created_by: int = telegram_id
@@ -100,7 +114,6 @@ class Order:
         self.text: str = text
         self.status: str = 1
         self.repository = repository or AsyncOrderRepository("./db.db")
-
 
     def set_order_text(self, text):
         self.text = text
@@ -112,11 +125,16 @@ class Order:
         return await self.repository.change_order_status(order_id, status)
 
     async def get_order_list(
-        self, status: Optional[int] = None, deparment: Optional[int] = None
+        self,
+        allowed_statuses: Optional[int] = None,
+        deparment: Optional[int] = None,
+        subdivision: Optional[int] = None,
     ):
         """Возвращает список всех заявок с заданным статусом и по заданному отделу.
         По умолчанию возвращает все заявки"""
-        return await self.repository.get_order_list_from_db(status, deparment)
+        return await self.repository.get_order_list_from_db(
+            allowed_statuses, deparment, subdivision
+        )
 
     async def get_max_order_id(self):
         return await self.repository.get_max_order_id()

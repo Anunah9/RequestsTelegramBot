@@ -58,9 +58,10 @@ async def complete_creation_order(
             ]
         ),
     )
+    await callback.bot.edit_message_reply_markup(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        reply_markup=None,
+    )
 
-    # await callback.message.answer(
-    #     text="", reply_markup=await main_menu_kb(callback.from_user.id)
-    # )
-    # await state.clear()
     await callback.answer(reply_markup=await main_menu_kb(callback.from_user.id))

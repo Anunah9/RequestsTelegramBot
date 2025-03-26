@@ -1,3 +1,4 @@
+from typing import Tuple
 from assets.db import AsyncDataBase
 
 # TODO Наследовать классы worker, department, subdivision от одного абстрактного класса
@@ -40,6 +41,7 @@ class AsyncDepartmentRepository:
             "INSERT INTO OrderDepartments VALUES (?, ?)",
             (order_id, department_id),
         ) as cursor:
+            print(f"INSERT INTO OrderDepartments VALUES ({order_id}, {department_id})")
             return await cursor.fetchone()
 
     async def get_department_dispatcher(self, department_id: int):
@@ -75,7 +77,7 @@ class Department:
     async def _add_to_departments_table(self, order_id, department_id):
         return await self.repository.add_to_departments(order_id, department_id)
 
-    async def add_to_departments(self, order_id, departments):
+    async def add_to_departments(self, order_id, departments: Tuple):
         department_ids = []
         for department in departments:
             department_ids.append(*await self.repository.get_department_id(department))
