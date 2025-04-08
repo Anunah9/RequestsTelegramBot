@@ -30,9 +30,14 @@ async def create_report(
 
 @router.message(ReportStates.choose_order_id)
 async def set_order_id(message: Message, state: FSMContext) -> None:
-    await state.update_data(order_id=message.text)
-    await message.answer("Введите текст отчета")
-    await state.set_state(ReportStates.set_text)
+    report_repo = ReportRepository("db.db")
+    if not await report_repo.is_report_uniq(message.text):
+        await message.answer("Заявка уже закрыта!")
+        await state.clear()
+    else:
+        await state.update_data(order_id=message.text)
+        await message.answer("Введите текст отчета")
+        await state.set_state(ReportStates.set_text)
 
 
 @router.message(ReportStates.set_text)
@@ -88,6 +93,9 @@ async def complete_creation_report(
 
     await callback.answer(reply_markup=await main_menu_kb(callback.from_user.id))
     # await state.clear()
+
+
+# TODO Сделать рассылку отчета начальнику подразделения
 
 
 @router.callback_query(F.data == "send_report", ReportStates.end_creation_report)

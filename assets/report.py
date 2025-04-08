@@ -42,6 +42,12 @@ class ReportRepository:
             await self.db._connection.commit()
             return cursor.lastrowid
 
+    async def is_report_uniq(self, order_id: int) -> bool:
+        async with self.db._connection.execute(
+            f"SELECT * FROM Report WHERE order_id={order_id}"
+        ) as cursor:
+            return not bool(await cursor.fetchone())
+
 
 class Report:
     def __init__(self, repository: ReportRepository):
