@@ -5,7 +5,7 @@ from types import CoroutineType
 from typing import Any
 
 from aiogram.fsm.state import StatesGroup
-from assets.db import AsyncDataBase
+from services.db import AsyncDataBase
 from aiogram.fsm.state import State
 
 

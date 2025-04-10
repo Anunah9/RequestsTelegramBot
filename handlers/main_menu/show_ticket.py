@@ -1,13 +1,13 @@
 from typing import Tuple
 from aiogram import F, Router
 from aiogram.types import Message
-from assets.order import Order, AsyncOrderRepository
+from services.order import Order, AsyncOrderRepository
 from aiogram.filters import Command
-from assets.order import STATUSES
-from middlewares.check_user_right import CheckUserRight
+from services.order import STATUSES
+# from middlewares.check_user_right import CheckUserRight
 
 router = Router()
-router.message.middleware(CheckUserRight("get_all_orders"))
+# router.message.middleware(CheckUserRight("get_all_orders"))
 
 
 def build_order_message(order_info: tuple) -> str:

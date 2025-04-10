@@ -2,21 +2,21 @@ from dataclasses import dataclass
 from typing import Optional
 from aiogram import Router, F
 from aiogram.types import Message
-from assets.order import OrderStates
+from services.order import TicketStates
 from aiogram.fsm.context import FSMContext
 
-from handlers.main_menu import send_order
+from handlers.main_menu import send_ticket
 
 router = Router()
 
 
-@router.message(OrderStates.set_subdivisions)
+@router.message(TicketStates.set_subdivisions)
 async def set_subdivisions(message: Message, state: FSMContext):
     state_data = await state.get_data()
     if message.text == "Завершить":
         await message.answer("Принято.")
         print(state_data.get("subdivisions"))
-        await send_order.process_selected_order(message, state)
+        await send_ticket.process_selected_order(message, state)
     else:
         subs = state_data.get("subdivisions")
         if subs:
@@ -27,4 +27,3 @@ async def set_subdivisions(message: Message, state: FSMContext):
                     message.text,
                 ]
             )
-

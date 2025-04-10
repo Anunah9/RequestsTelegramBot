@@ -1,12 +1,12 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
-from assets.logger import logger
+from services.logger import logger
 from keyboards.main_menu_kb import main_menu_kb
-from assets.user import User
+from services.user import User
 from handlers import register
 from aiogram.fsm.context import FSMContext
-from assets.user import User, UserState
+from services.user import User, UserState
 
 router = Router()
 router.include_router(register.router)

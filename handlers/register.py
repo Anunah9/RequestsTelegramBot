@@ -3,13 +3,13 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from assets.user import UserState, User, AsyncUserRepository
-from assets.db import AsyncDataBase
+from services.user import UserState, User, AsyncUserRepository
+from services.db import AsyncDataBase
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.role_keyboard_kb import choose_from_list_keyboard
 from keyboards.main_menu_kb import main_menu_kb
-from assets.subdivision import AsyncSubdivisionRepository, Subdivision
-from assets.department import AsyncDepartmentRepository, Department
+from services.subdivision import AsyncSubdivisionRepository, Subdivision
+from services.department import AsyncDepartmentRepository, Department
 
 router = Router()
 

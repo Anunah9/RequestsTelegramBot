@@ -1,6 +1,6 @@
 from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from assets.subdivision import Subdivision, AsyncSubdivisionRepository
+from services.subdivision import Subdivision, AsyncSubdivisionRepository
 
 
 async def choose_subdivisions_kb(department_id: int):

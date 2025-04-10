@@ -6,7 +6,7 @@ from sqlite3 import Row
 from typing import Dict, Optional
 from aiogram.fsm.state import StatesGroup, State
 import aiosqlite
-from assets.db import AsyncDataBase
+from services.db import AsyncDataBase
 
 STATUSES = {
     1: "Создана",
@@ -17,11 +17,11 @@ STATUSES = {
 # TODO Сделать lower() при получении id из бд
 
 
-class OrderStates(StatesGroup):
+class TicketStates(StatesGroup):
     # Состояния для работы с заявками
-    set_text = State()
+    set_ticket_text = State()
     end_creation_order = State()
-    set_departments = State()
+    set_department = State()
     set_status = State()
     set_workers = State()
 

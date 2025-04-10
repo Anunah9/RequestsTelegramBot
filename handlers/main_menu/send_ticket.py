@@ -9,16 +9,16 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters.callback_data import CallbackData
 from typing import Optional, Tuple
 
-# Импорт кастомных модулей и репозиториев
-from assets.user import User
 from handlers.cancel import main_menu_kb
-from keyboards.choose_departments_kb import choose_departments_kb
+from keyboards.choose_department_kb import choose_department_kb
 from keyboards.choose_subdivisions_kb import choose_subdivisions_kb
-from middlewares.check_user_right import CheckUserRight
-from assets.department import Department, AsyncDepartmentRepository
-from assets.subdivision import AsyncSubdivisionRepository, Subdivision
-from assets.order import AsyncOrderRepository, Order, OrderStates
+
+# from middlewares.check_user_right import CheckUserRight
 from handlers.main_menu import set_departments, set_subdivissions
+from services.department import AsyncDepartmentRepository, Department
+from services.order import AsyncOrderRepository, Order, TicketStates
+from services.subdivision import AsyncSubdivisionRepository, Subdivision
+from services.user import User
 
 
 class OrderService:
@@ -26,19 +26,14 @@ class OrderService:
 
     def __init__(self, state: FSMContext):
         self.state = state
-        self.department_repo = AsyncDepartmentRepository("./db.db")
-        self.order_repo = AsyncOrderRepository("./db.db")
-        self.subdivision_repo = AsyncSubdivisionRepository("./db.db")
 
-    async def get_order_info(self, order_id: int) -> Order:
-        order = Order(repository=self.order_repo)
-        return await order.get_order_by_id(order_id)
+    async def get_order_info(self, order_id: int):
+        pass
 
     async def get_latest_order_id(self) -> Optional[int]:
         # TODO: Реализовать получение последнего ID заявки
         # Если заявка отсутствует, вернуть None
         raise Exception("Not implemented yet")
-        pass
 
 
 def build_order_message(order_info: tuple) -> str:
@@ -54,7 +49,7 @@ def build_order_message(order_info: tuple) -> str:
 
 router = Router()
 router.include_routers(set_departments.router, set_subdivissions.router)
-router.message.middleware(CheckUserRight("send_order"))
+# router.message.middleware(CheckUserRight("send_order"))
 
 
 async def ask_order_selection(message: Message):
@@ -98,11 +93,11 @@ async def handle_select_latest_order(
 async def handle_enter_order_id(callback: CallbackQuery, state: FSMContext):
     """Переводит пользователя в режим ввода ID заявки"""
     await callback.message.answer("Введите ID заявки:")
-    await state.set_state(OrderStates.waiting_for_order_id)
+    await state.set_state(TicketStates.waiting_for_order_id)
     await callback.answer()
 
 
-@router.message(OrderStates.waiting_for_order_id)
+@router.message(TicketStates.waiting_for_order_id)
 async def process_manual_order_id(
     message: Message, state: FSMContext, user_role: str, user_department: Tuple
 ):
@@ -169,9 +164,9 @@ async def process_selected_order(message: Message, state: FSMContext):
         if "departments" not in user_data:
             await message.answer(
                 "Введите отделы, если закончили введите Завершить.",
-                reply_markup=await choose_departments_kb(),
+                reply_markup=await choose_department_kb(),
             )
-            await state.set_state(OrderStates.set_departments)
+            await state.set_state(TicketStates.set_department)
         else:
             await state.update_data(target="departments")
             selected_departments = user_data.get("departments")
@@ -185,7 +180,7 @@ async def process_selected_order(message: Message, state: FSMContext):
                 "Введите отделы, если закончили введите Завершить.",
                 reply_markup=await choose_subdivisions_kb(user_department_id),
             )
-            await state.set_state(OrderStates.set_subdivisions)
+            await state.set_state(TicketStates.set_subdivisions)
         else:
             await state.update_data(target="subdivisions")
             selected_subdivisions = user_data.get("subdivisions")

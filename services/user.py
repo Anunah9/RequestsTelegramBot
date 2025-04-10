@@ -1,5 +1,5 @@
 import functools
-from assets.db import AsyncDataBase
+from services.db import AsyncDataBase
 from aiogram.fsm.state import StatesGroup, State
 from typing import List, Optional, Dict, Tuple, Union
 import asyncio

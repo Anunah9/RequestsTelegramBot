@@ -1,5 +1,5 @@
 from typing import Tuple
-from assets.db import AsyncDataBase
+from services.db import AsyncDataBase
 
 # TODO Наследовать классы worker, department, subdivision от одного абстрактного класса
 

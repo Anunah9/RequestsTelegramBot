@@ -1,24 +1,25 @@
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from assets.order import OrderStates, Order, AsyncOrderRepository
-from middlewares.check_user_right import CheckUserRight
+from services.order import TicketStates, Order, AsyncOrderRepository
+
+# from middlewares.check_user_right import CheckUserRight
 from keyboards.edit_order_kb import edit_order_keyboard
 from keyboards.main_menu_kb import main_menu_kb
 
 
 router = Router()
-router.message.middleware(CheckUserRight("edit_order"))
+# router.message.middleware(CheckUserRight("edit_order"))
 
 
 @router.message(F.text == "Редактировать заявку")
 async def start_edit_order(message: Message, state: FSMContext):
     await message.answer("Вы в функции редактирования заявки")
     await message.answer("Введите ID заявки которую хотите отредактировать.")
-    await state.set_state(OrderStates.get_order_id)
+    await state.set_state(TicketStates.get_order_id)
 
 
-@router.message(OrderStates.get_order_id)
+@router.message(TicketStates.get_order_id)
 async def choose_editable_value(message: Message, state: FSMContext):
     await state.update_data(order_id=message.text)
     await message.answer(
@@ -38,10 +39,10 @@ async def edit_text(callback: CallbackQuery, state: FSMContext):
         raise Exception(f"Empty order text {text}")
     await callback.message.answer(f"Текст заявки: {text[1]}")
     await callback.message.answer("Введите новый текст заявки: ")
-    await state.set_state(OrderStates.set_edited_order_text)
+    await state.set_state(TicketStates.set_edited_order_text)
 
 
-@router.message(OrderStates.set_edited_order_text)
+@router.message(TicketStates.set_edited_order_text)
 async def complete_edit_order_text(message: Message, state: FSMContext):
     data = await state.get_data()
     order: Order = data["order"]

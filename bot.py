@@ -9,14 +9,14 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from handlers import start, cancel, help
 from handlers.main_menu import (
-    create_order,
+    create_ticket,
+    edit_ticket,
     main_menu,
-    edit_order,
-    send_order,
-    show_orders,
+    send_ticket,
     create_report,
+    show_ticket,
 )
-from assets.logger import logger
+from services.logger import logger
 import yaml
 
 
@@ -44,11 +44,11 @@ async def main() -> None:
         cancel.router,
         help.router,
         start.router,
-        create_order.router,
+        create_ticket.router,
         main_menu.router,
-        edit_order.router,
-        send_order.router,
-        show_orders.router,
+        edit_ticket.router,
+        send_ticket.router,
+        show_ticket.router,
         create_report.router,
     )
     await dp.start_polling(bot)

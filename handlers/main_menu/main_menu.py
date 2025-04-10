@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
 from keyboards.main_menu_kb import main_menu_kb
-from assets.user import User
+from services.user import User
 
 
 router = Router()

@@ -1,4 +1,4 @@
-from assets.db import AsyncDataBase
+from services.db import AsyncDataBase
 
 
 class AsyncSubdivisionRepository:

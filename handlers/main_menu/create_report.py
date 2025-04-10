@@ -1,20 +1,20 @@
 import stat
 from typing import Tuple
-from assets import report
-from assets.order import AsyncOrderRepository, Order
-from assets.report import Report, ReportRepository, ReportStates
-from assets.user import User
+from services import report
+from services.order import AsyncOrderRepository, Order
+from services.report import Report, ReportRepository, ReportStates
+from services.user import User
 from keyboards.complete_create_report_kb import complete_create_report_kb
-from middlewares.check_user_right import CheckUserRight
+# from middlewares.check_user_right import CheckUserRight
 from keyboards.main_menu_kb import main_menu_kb
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from assets.report import Report, ReportStates
+from services.report import Report, ReportStates
 from aiogram import F, Router
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 router = Router()
-router.message.middleware(CheckUserRight("create_report"))
+# router.message.middleware(CheckUserRight("create_report"))
 
 
 @router.message(F.text == "Создать отчёт")
