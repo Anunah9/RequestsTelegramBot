@@ -3,7 +3,6 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from keyboards.main_menu_kb import main_menu_kb
 
-
 router = Router()
 
 

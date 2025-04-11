@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from aiogram import Router, F
 from aiogram.types import Message
-from services.order import TicketStates
+from services.states import TicketStates
 from aiogram.fsm.context import FSMContext
 
 from handlers.ticket import send_ticket

@@ -1,13 +1,10 @@
 from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from services.subdivision import Subdivision, AsyncSubdivisionRepository
 
 
 async def choose_subdivisions_kb(department_id: int):
-    repository = AsyncSubdivisionRepository("./db.db")
-    await repository.connect()
-    subdivision = Subdivision(respository=repository)
-    subdivision_list = await subdivision.get_subdivision_list(department_id)
+
+    subdivision_list = ["f", "a", "as"]
     builder = ReplyKeyboardBuilder()
     for btn in subdivision_list:
         builder.add(KeyboardButton(text=btn[1]))

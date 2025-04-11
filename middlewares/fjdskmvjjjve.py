@@ -1,9 +1,6 @@
 from aiogram import BaseMiddleware
 from typing import Any, Callable, Dict, Awaitable, Union
 from aiogram.types import TelegramObject
-from assets.department import Department, AsyncDepartmentRepository
-from assets.user import User
-from assets.db import AsyncDataBase
 from random import randint
 
 
