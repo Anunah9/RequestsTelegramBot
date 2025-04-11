@@ -1,8 +1,8 @@
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
-def edit_order_keyboard():
+def edit_order_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     editable = [
         ("Текст заявки", "edit_text"),

@@ -2,20 +2,22 @@ import asyncio
 import logging
 import sys
 import os
+from typing import final
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from handlers import start, cancel, help
+from handlers.commands import start, cancel, help
 from handlers.main_menu import (
-    create_ticket,
-    edit_ticket,
     main_menu,
-    send_ticket,
-    create_report,
-    show_ticket,
 )
+from handlers.ticket import (
+    send_ticket,
+    show_ticket,
+    create_ticket,
+)
+from handlers.report import create_report
 from services.logger import logger
 import yaml
 
@@ -40,20 +42,25 @@ async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
 
     await bot.delete_webhook(drop_pending_updates=True)
-    dp.include_routers(
-        cancel.router,
-        help.router,
-        start.router,
+
+    ticket_routers = [
         create_ticket.router,
-        main_menu.router,
-        edit_ticket.router,
-        send_ticket.router,
         show_ticket.router,
-        create_report.router,
+    ]
+    report_routers = []
+    command_routers = [cancel.router, help.router, start.router]
+
+    dp.include_routers(
+        *command_routers,
+        *ticket_routers,
+        *report_routers,
+        main_menu.router,
     )
     await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Завершаюсь")

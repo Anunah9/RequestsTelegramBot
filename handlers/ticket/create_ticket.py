@@ -12,13 +12,13 @@ from aiogram import F, Router
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from services.selectors import get_departments_list
 import settings
-from services.services import encrypt_telegram_id
+from services.services import ticket_create
 
 router = Router()
 
 
 @router.message(F.text == "Создать заявку")
-async def start_create_ticket(
+async def start_create_ticket_handler(
     message: Message,
     state: FSMContext,
 ):
@@ -59,55 +59,28 @@ async def set_department_handler(message: Message, state: FSMContext):
     await state.set_state(TicketStates.end_creation_order)
 
 
-# TODO Перенести в services
-#########################################
-def create_ticket(text: str, department: int, telegram_id: int) -> requests.Response:
-    token = encrypt_telegram_id(telegram_id)
-    print({"text": text, "department": department})
-    return requests.post(
-        settings.BASE_URL + "/api/v1/tickets/create_ticket",
-        json={"text": text, "department": department},
-        headers={"X-Custom-Token": token},
-    )
-########################################
-
-
 @router.callback_query(
     F.data == "complete_creation_order", TicketStates.end_creation_order
 )
 async def complete_creation_order_handler(
     callback: CallbackQuery,
     state: FSMContext,
-):
+) -> None:
     order_data = await state.get_data()
 
     department_id = order_data.get("department_id")
     ticket_text = order_data.get("ticket_text")
-    response = create_ticket(
+    response_data: dict = ticket_create(
         text=ticket_text, telegram_id=callback.message.chat.id, department=department_id
     )
-    response_body: dict = response.json()
-    print(
-        f"Response from creation order: {response}, body: {response_body}",
-    )
+
     await callback.message.answer(
-        text=f"Заявка добавлена\n Её ID - {response_body.get("id", None)}",
-        # Пока что убрал эту кнопку так как рассылка происходит в момент установки отдела и подразделений
-        # reply_markup=InlineKeyboardMarkup(
-        #     inline_keyboard=[
-        #         [
-        #             InlineKeyboardButton(
-        #                 text="Отправить заявку",
-        #                 callback_data="send_order_from_creation_order",
-        #             )
-        #         ]
-        #     ]
-        # ),
+        text=f"Заявка добавлена\n Её ID - {response_data.get("id", None)}",
     )
-    # await callback.bot.edit_message_reply_markup(
-    #     chat_id=callback.from_user.id,
-    #     message_id=callback.message.message_id,
-    #     reply_markup=None,
-    # )
+    await callback.bot.edit_message_reply_markup(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        reply_markup=None,
+    )
 
     await callback.answer(reply_markup=await main_menu_kb(callback.from_user.id))
