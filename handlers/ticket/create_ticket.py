@@ -6,12 +6,9 @@ from keyboards.main_menu_kb import main_menu_kb
 
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from services import department
+from services.selectors import get_departments_list
 from services.states import TicketStates
 from aiogram import F, Router
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from services.selectors import get_departments_list
-import settings
 from services.services import ticket_create
 
 router = Router()

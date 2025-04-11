@@ -4,6 +4,18 @@ from services.services import encrypt_telegram_id
 import settings
 
 
+def get_subdivisions_list(telegram_id) -> dict:
+    auth_token = encrypt_telegram_id(telegram_id)
+    url = settings.BASE_URL + "api/v1/common/subdivisions_list"
+    headers = {"X-Custom-Token": auth_token}
+    response = requests.get(url, headers=headers)
+    try:
+        print(response, response.json())
+        return response.json()
+    except Exception as exc:
+        raise exc
+
+
 def get_departments_list(telegram_id):
     auth_token = encrypt_telegram_id(telegram_id)
     url = settings.BASE_URL + "api/v1/common/departments_list"
@@ -15,7 +27,7 @@ def get_departments_list(telegram_id):
         raise exc
 
 
-def ticket_list(telegram_id: int) -> requests.Response:
+def get_ticket_list(telegram_id: int) -> requests.Response:
     """Возвращает заявки доступные этому пользователю"""
     token = encrypt_telegram_id(telegram_id)
     response = requests.get(
@@ -26,10 +38,10 @@ def ticket_list(telegram_id: int) -> requests.Response:
     return response.json()
 
 
-def user_detailed(telegram_id: int) -> requests.Response:
+def get_user_detailed(telegram_id: int) -> requests.Response:
     """Возвращает заявки доступные этому пользователю"""
     token = encrypt_telegram_id(telegram_id)
-    url = settings.BASE_URL + "/api/v1/auth_service/user_detailed"
+    url = settings.BASE_URL + "/api/v1/user/user_detailed"
     response = requests.get(
         url=url,
         headers={"X-Custom-Token": token},
@@ -39,7 +51,7 @@ def user_detailed(telegram_id: int) -> requests.Response:
 
 def get_user_rights(user_id: int) -> Optional[dict]:
     auth_token = encrypt_telegram_id(user_id)
-    url = settings.BASE_URL + "/api/v1/auth_service/user_rights_list"
+    url = settings.BASE_URL + "/api/v1/user/user_rights_list"
     headers = {"X-Custom-Token": auth_token}
     response = requests.get(url, headers=headers)
 

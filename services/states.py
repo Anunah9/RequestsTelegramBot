@@ -22,13 +22,13 @@ class TicketStates(StatesGroup):
     set_ticket_text = State()
     end_creation_order = State()
     set_department = State()
-    set_status = State()
-    set_workers = State()
+    set_subdivisions = State()
+    get_ticket_id = State()
+    # set_status = State()
+    # set_workers = State()
 
     # Edit states
-    get_order_id = State()
     set_edited_order_text = State()
     change_order_for_send = State()
-    set_subdivisions = State()
 
     waiting_for_order_id = State()

@@ -4,7 +4,7 @@ from aiogram.types import Message
 import requests
 from aiogram.filters import Command
 
-from services.selectors import ticket_list
+from services.selectors import get_ticket_list
 from settings import BASE_URL
 
 
@@ -34,7 +34,7 @@ async def show_ticket_handler(
 ) -> None:
     await message.answer("Заявки:")
 
-    tickets: list[dict] = ticket_list(telegram_id=message.chat.id)
+    tickets: list[dict] = get_ticket_list(telegram_id=message.chat.id)
 
     for ticket in tickets:
         ticket_message = build_ticket_message(

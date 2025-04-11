@@ -12,11 +12,7 @@ from handlers.commands import start, cancel, help
 from handlers.main_menu import (
     main_menu,
 )
-from handlers.ticket import (
-    send_ticket,
-    show_ticket,
-    create_ticket,
-)
+from handlers.ticket import show_ticket, create_ticket, set_subdivisions
 from handlers.report import create_report
 from services.logger import logger
 import yaml
@@ -43,10 +39,7 @@ async def main() -> None:
 
     await bot.delete_webhook(drop_pending_updates=True)
 
-    ticket_routers = [
-        create_ticket.router,
-        show_ticket.router,
-    ]
+    ticket_routers = [create_ticket.router, show_ticket.router, set_subdivisions.router]
     report_routers = []
     command_routers = [cancel.router, help.router, start.router]
 
