@@ -59,3 +59,16 @@ def get_user_rights(user_id: int) -> Optional[dict]:
         return response.json()
     except Exception as exc:
         raise exc
+
+
+def is_report_exist(ticket_id: int, telegram_id: int):
+    """Функция проверки на существование отчета по заявке"""
+    url = settings.BASE_URL + "/api/v1/report/is_report_exist"
+    params = {"ticket_id": ticket_id}
+    token = encrypt_telegram_id(telegram_id)
+    headers = {"X-Custom-Token": token}
+    response = requests.get(url=url, params=params, headers=headers)
+    is_exist = response.json().get("is_exist")
+    print(is_exist)
+    print(bool(is_exist))
+    return is_exist

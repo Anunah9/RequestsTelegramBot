@@ -15,7 +15,7 @@ async def main_menu_kb(user_id) -> ReplyKeyboardMarkup:
         if ru:
             btn = ru
         else:
-            btn = btn.get("name")
+            continue
         builder.add(KeyboardButton(text=btn))
     builder.adjust(2)
     return builder.as_markup(resize_keyboard=True, one_time_keyboard=True)

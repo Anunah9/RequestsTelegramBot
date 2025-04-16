@@ -60,3 +60,14 @@ def ticket_subdivisions_update(
     )
     print(response, f"body: {response.json()}")
     return response.json()
+
+
+async def report_create(ticket_id: int, text: str, telegram_id: int):
+    token = encrypt_telegram_id(telegram_id)
+    headers = {"X-Custom-Token": token}
+    url = settings.BASE_URL + "api/v1/report/create_report"
+    json = {"ticket_id": ticket_id, "text": text}
+    print(json)
+    response = requests.post(url=url, json=json, headers=headers)
+    print(response, f"body: {response.json()}")
+    return response.json()

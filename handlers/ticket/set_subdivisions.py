@@ -21,8 +21,8 @@ router = Router()
 async def manual_choose_ticket_for_subdivision_set(message: Message, state: FSMContext):
     await message.answer("Введите ID заявки:")
     await state.set_state(TicketStates.get_ticket_id)
-
-
+ 
+ 
 @router.message(TicketStates.get_ticket_id)
 async def get_ticket_id_from_user(message: Message, state: FSMContext):
     ticket_id = int(message.text)
@@ -50,11 +50,11 @@ async def set_subdivisions_handler(message: Message, state: FSMContext):
             subdivision_name=message.text,
             subdivisions_list=subdivisions_list,
         )
+
         state_data["subdivisions"] = target_subdivisions
         await state.update_data(state_data)
         await message.answer("Подразделение добавлено.")
     elif message.text == "Завершить":
-
         await message.answer("Принято.")
         ticket_id = state_data.get("ticket_id")
         ticket_subdivisions_update(
