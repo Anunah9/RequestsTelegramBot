@@ -69,6 +69,4 @@ def is_report_exist(ticket_id: int, telegram_id: int):
     headers = {"X-Custom-Token": token}
     response = requests.get(url=url, params=params, headers=headers)
     is_exist = response.json().get("is_exist")
-    print(is_exist)
-    print(bool(is_exist))
     return is_exist
