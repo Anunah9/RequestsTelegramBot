@@ -71,3 +71,14 @@ async def report_create(ticket_id: int, text: str, telegram_id: int):
     response = requests.post(url=url, json=json, headers=headers)
     print(response, f"body: {response.json()}")
     return response.json()
+
+
+def accept_ticket(telegram_id: int, ticket_id: int):
+    url = settings.BASE_URL + "api/v1/tickets/change_status"
+    token = encrypt_telegram_id(telegram_id)
+    headers = {"X-Custom-Token": token}
+    json = {"ticket_id": ticket_id, "status": "Recieved"}
+    print(json)
+    response = requests.patch(url=url, json=json, headers=headers)
+    print(response, f"body: {response.json()}")
+    return response.json()

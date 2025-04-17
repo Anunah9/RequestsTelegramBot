@@ -34,8 +34,11 @@ def get_ticket_list(telegram_id: int) -> requests.Response:
         settings.BASE_URL + "/api/v1/tickets/",
         headers={"X-Custom-Token": token},
     )
-    print(response, f"body: {response.json()}")
-    return response.json()
+    if response.status_code != 200:
+        print(response, f"body: {response.json()}")
+        raise Exception(response.json())
+    else:
+        return response.json()
 
 
 def get_user_detailed(telegram_id: int) -> requests.Response:
