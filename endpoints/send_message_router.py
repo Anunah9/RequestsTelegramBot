@@ -1,12 +1,27 @@
 from typing import Optional
-from fastapi import APIRouter, HTTPException
+from aiogram import Bot
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 
 # Импортируем функцию отправки из services
 from services.send_message import send_message_to_user
 
+
 router = APIRouter()
+
+
+async def get_bot(request: Request) -> Bot:
+    """
+    FastAPI Dependency: Получает экземпляр aiogram Bot из состояния приложения.
+    """
+    if not hasattr(request.app.state, "bot"):
+        # Эта проверка на случай, если что-то пошло не так при запуске
+        raise HTTPException(
+            status_code=500,
+            detail="Экземпляр бота не инициализирован в приложении FastAPI",
+        )
+    return request.app.state.bot
 
 
 class MessageBody(BaseModel):
@@ -22,7 +37,9 @@ class MessageBody(BaseModel):
 
 
 @router.post("/send_message")
-async def bulk_send_message(body: MessageBody) -> dict[str, str]:
+async def bulk_send_message(
+    body: MessageBody, bot: Bot = Depends(get_bot)
+) -> dict[str, str]:
     """
     Рассылка сообщения пользователям
     Пример:
@@ -39,6 +56,7 @@ async def bulk_send_message(body: MessageBody) -> dict[str, str]:
     for id in body.user_ids:
 
         success = await send_message_to_user(
+            bot=bot,
             user_id=id,
             text=body.text,
             type=body.type,

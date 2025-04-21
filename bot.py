@@ -8,7 +8,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from endpoints import send_message_router
+
 from handlers.commands import start, cancel, help
 from handlers.main_menu import (
     main_menu,
@@ -16,27 +16,15 @@ from handlers.main_menu import (
 from handlers.ticket import show_ticket, create_ticket, set_subdivisions
 from handlers.report import create_report, accept_ticket
 from services.logger import logger
-import yaml
-from fastapi import FastAPI
+import settings
 import uvicorn
+from fastapi import FastAPI
+from endpoints import send_message_router
 
-
-def load_token_from_yaml(file_path: str) -> str:
-    """Загружает TOKEN из YAML-файла."""
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            data = yaml.safe_load(file)
-            return data.get("TOKEN", "")
-    except FileNotFoundError:
-        print("Файл не найден.")
-    except yaml.YAMLError as e:
-        print(f"Ошибка при чтении YAML: {e}")
-    return ""
-
-
-# Создание экземпляра телеграм бота
-TOKEN = load_token_from_yaml("config.yaml")
-bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(
+    token=settings.TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+)
 
 
 async def configure_bot():
@@ -60,6 +48,7 @@ async def configure_bot():
 
 # Создание экземпляра фаст апи приложения
 app = FastAPI()
+app.state.bot = bot
 
 
 async def configure_fast_api_server():
@@ -77,7 +66,16 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    # Устанавливаем 'bot' в 'app.state' перед запуском
+    if not hasattr(app.state, "bot"):
+        app.state.bot = (
+            bot  # На случай если __main__ выполняется до глобального присвоения
+        )
+
     try:
         asyncio.run(main())
-    except KeyboardInterrupt:
-        print("Завершаюсь")
+    except (KeyboardInterrupt, SystemExit):
+        print("Приложение останавливается...")
+    finally:
+        print("Приложение завершило работу.")

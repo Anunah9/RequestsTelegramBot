@@ -1,9 +1,10 @@
 from typing import Optional
-from bot import bot
+import aiogram
 from aiogram.exceptions import TelegramAPIError
 import logging
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from callbacks import SendMessageKbCallback
+
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,7 @@ def keyboard_builder(
 
 
 async def send_message_to_user(
+    bot: aiogram.Bot, 
     ticket_id: int,
     user_id: int,
     text: str,
