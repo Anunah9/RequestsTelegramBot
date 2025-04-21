@@ -49,7 +49,10 @@ def get_user_detailed(telegram_id: int) -> requests.Response:
         url=url,
         headers={"X-Custom-Token": token},
     )
-    return response.json()
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
 
 
 def get_user_rights(user_id: int) -> Optional[dict]:
@@ -57,11 +60,11 @@ def get_user_rights(user_id: int) -> Optional[dict]:
     url = settings.BASE_URL + "/api/v1/user/user_rights_list"
     headers = {"X-Custom-Token": auth_token}
     response = requests.get(url, headers=headers)
-
-    try:
+    if response.status_code == 200:
         return response.json()
-    except Exception as exc:
-        raise exc
+    elif response.status_code == 401:
+        return {}
+
 
 
 def is_report_exist(ticket_id: int, telegram_id: int):
