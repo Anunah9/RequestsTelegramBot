@@ -18,7 +18,7 @@ class MessageBody(BaseModel):
     )
     user_ids: list[int]
     text: str
-    ticket_id: int
+    ticket_id: Optional[int] = None
 
 
 @router.post("/send_message")

@@ -49,6 +49,8 @@ def keyboard_builder(
                     ]
                 ]
             )
+        else:
+            keyboard = None
 
     return keyboard
 
