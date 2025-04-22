@@ -44,7 +44,7 @@ def keyboard_builder(
                 inline_keyboard=[
                     [
                         InlineKeyboardButton(
-                            text="Выбрать подразделения (пока в разработке)",
+                            text="Выбрать подразделения",
                             callback_data=cb3.pack(),
                         ),
                     ]
@@ -57,7 +57,7 @@ def keyboard_builder(
 
 
 async def send_message_to_user(
-    bot: aiogram.Bot, 
+    bot: aiogram.Bot,
     ticket_id: int,
     user_id: int,
     text: str,

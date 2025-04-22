@@ -3,10 +3,12 @@ from aiogram import F, Router
 from aiogram.types import Message
 import requests
 from aiogram.filters import Command
-
+from aiogram.types import CallbackQuery, Message
+from aiogram.fsm.context import FSMContext
 from services.selectors import get_ticket_list
 from settings import BASE_URL
-
+from callbacks import FilterTicketsCallback
+from keyboards.filter_view_tickets_kb import filter_view_tickets_kb
 
 # from middlewares.check_user_right import CheckUserRight
 
@@ -29,12 +31,24 @@ def build_ticket_message(
 
 @router.message(Command("tickets"))
 @router.message(F.text == "Просмотреть заявки")
-async def show_ticket_handler(
-    message: Message,
-) -> None:
-    await message.answer("Заявки:")
+async def choose_filter(message: Message):
+    await message.answer(
+        text="Выберите интересующую категорию заявок",
+        reply_markup=filter_view_tickets_kb(),
+    )
 
-    tickets: list[dict] = get_ticket_list(telegram_id=message.chat.id)
+
+@router.callback_query(FilterTicketsCallback.filter())
+async def show_ticket_handler(
+    callback: CallbackQuery,
+    callback_data: FilterTicketsCallback,
+    state: FSMContext,
+) -> None:
+    await callback.message.answer("Заявки:")
+
+    tickets: list[dict] = get_ticket_list(
+        telegram_id=callback.message.chat.id, status=callback_data.filter
+    )
 
     for ticket in tickets:
         ticket_message = build_ticket_message(
@@ -44,4 +58,6 @@ async def show_ticket_handler(
             status=ticket.get("status"),
         )
 
-        await message.answer(ticket_message)
+        await callback.message.answer(ticket_message)
+    await callback.message.answer("----------------------------------------------------")
+    await callback.answer()

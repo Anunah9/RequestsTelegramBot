@@ -3,7 +3,7 @@ import requests
 from keyboards.complete_create_ticket_kb import complete_create_order_kb
 from keyboards.choose_department_kb import choose_department_kb
 from keyboards.main_menu_kb import main_menu_kb
-
+from aiogram.types import ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from services.selectors import get_departments_list
@@ -19,7 +19,7 @@ async def start_create_ticket_handler(
     message: Message,
     state: FSMContext,
 ):
-    await message.answer("Введите текст заявки")
+    await message.answer("Введите текст заявки", reply_markup=ReplyKeyboardRemove())
     await state.set_state(TicketStates.set_ticket_text)
 
 
@@ -77,7 +77,6 @@ async def complete_creation_order_handler(
     )
     await callback.bot.edit_message_reply_markup(
         chat_id=callback.from_user.id,
-        message_id=callback.message.message_id,
-        reply_markup=None,
+        message_id=callback.message.message_id
     )
     await state.clear()

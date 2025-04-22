@@ -27,12 +27,18 @@ def get_departments_list(telegram_id):
         raise exc
 
 
-def get_ticket_list(telegram_id: int) -> requests.Response:
+def get_ticket_list(telegram_id: int, status: Optional[str]= None, page: Optional[int] = None) -> dict:
     """Возвращает заявки доступные этому пользователю"""
     token = encrypt_telegram_id(telegram_id)
+    params = {}
+    if status:
+        params["status"] = status
+    if page:
+        params["page"] = page
     response = requests.get(
-        settings.BASE_URL + "/api/v1/tickets/",
+        settings.BASE_URL + "/api/v1/tickets/tickets_list",
         headers={"X-Custom-Token": token},
+        params=params
     )
     if response.status_code != 200:
         print(response, f"body: {response.json()}")
