@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional
 from aiogram import F, Router
-from aiogram.types import Message
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 import requests
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
@@ -52,12 +52,35 @@ async def show_ticket_handler(
     callback_data: FilterTicketsCallback,
     state: FSMContext,
 ) -> None:
-    await callback.message.answer("Заявки:")
 
-    tickets: list[dict] = get_ticket_list(
-        telegram_id=callback.message.chat.id, status=callback_data.filter
+    next_page = callback_data.next_page
+    previous_page = callback_data.previous_page
+    action = callback_data.action
+    if action == "next_page":
+        page = next_page
+    elif action == "previous_page":
+        page = previous_page
+    else:
+        page = None
+    paginated_response = get_ticket_list(
+        telegram_id=callback.message.chat.id, status=callback_data.filter, page=page
     )
-
+    next_page = paginated_response.get("next")
+    previous_page = paginated_response.get("previous")
+    cb_next = FilterTicketsCallback(
+        filter=callback_data.filter,
+        next_page=next_page,
+        previous_page=previous_page,
+        action="next_page",
+    )
+    cb_prev = FilterTicketsCallback(
+        filter=callback_data.filter,
+        next_page=next_page,
+        previous_page=previous_page,
+        action="previous_page",
+    )
+    tickets: list[dict] = paginated_response.get("results")
+    tickets_list = []
     for ticket in tickets:
         ticket_message = build_ticket_message(
             ticket_id=ticket.get("id"),
@@ -66,9 +89,30 @@ async def show_ticket_handler(
             status=ticket.get("status"),
             report_text=ticket.get("report_text"),
         )
+        tickets_list.append(ticket_message)
 
-        await callback.message.answer(ticket_message)
-    await callback.message.answer(
-        "----------------------------------------------------"
+        # await callback.message.answer(ticket_message)
+    inline_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="Назад", callback_data=cb_prev.pack()),
+                InlineKeyboardButton(text="Вперед", callback_data=cb_next.pack()),
+            ]
+        ]
     )
+    if action in ("next_page", "previos_page"):
+        await callback.message.edit_text(
+            text="\n----------------------------------------------------\n".join(
+                tickets_list
+            ),
+            reply_markup=inline_kb,
+        )
+    else:
+        await callback.message.answer("Заявки:")
+        await callback.message.answer(
+            "\n----------------------------------------------------\n".join(
+                tickets_list
+            ),
+            reply_markup=inline_kb,
+        )
     await callback.answer()
