@@ -79,8 +79,12 @@ async def show_ticket_handler(
         previous_page=previous_page,
         action="previous_page",
     )
+    count = paginated_response.get("count")
+    pages = round(count / 10)
     tickets: list[dict] = paginated_response.get("results")
-    tickets_list = []
+    tickets_list = [
+        f"Страница {1 if not previous_page else previous_page+1} из {pages}",
+    ]
     for ticket in tickets:
         ticket_message = build_ticket_message(
             ticket_id=ticket.get("id"),
@@ -100,7 +104,7 @@ async def show_ticket_handler(
             ]
         ]
     )
-    if action in ("next_page", "previos_page"):
+    if action in ("next_page", "previous_page"):
         await callback.message.edit_text(
             text="\n----------------------------------------------------\n".join(
                 tickets_list
