@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional
 from aiogram import F, Router
 from aiogram.types import Message
 import requests
@@ -17,16 +18,23 @@ router = Router()
 
 
 def build_ticket_message(
-    *, ticket_id: int, ticket_text: str, created_at: date, status: str
+    *,
+    ticket_id: int,
+    ticket_text: str,
+    created_at: date,
+    status: str,
+    report_text: Optional[str],
 ) -> str:
     """Формирует текст сообщения по информации о заявке"""
     # print(STATUSES.get(status, "NaN"))
-    return (
-        f"ID заявки: {ticket_id}\n"
-        f"Текст заявки: {ticket_text}\n"
-        f"Статус заявки: {status}\n"
-        f"Создана: {created_at}"
+    text = (
+        f"ID заявки: {ticket_id}\n",
+        f"Текст заявки: {ticket_text}\n",
+        f"Статус заявки: {status}\n",
+        f"Отчёт по заявке: {report_text}\n" if report_text else "",
+        f"Создана: {created_at}",
     )
+    return "".join(text)
 
 
 @router.message(Command("tickets"))
@@ -56,8 +64,11 @@ async def show_ticket_handler(
             ticket_text=ticket.get("text"),
             created_at=ticket.get("created_at"),
             status=ticket.get("status"),
+            report_text=ticket.get("report_text"),
         )
 
         await callback.message.answer(ticket_message)
-    await callback.message.answer("----------------------------------------------------")
+    await callback.message.answer(
+        "----------------------------------------------------"
+    )
     await callback.answer()
