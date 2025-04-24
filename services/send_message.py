@@ -12,24 +12,33 @@ logger = logging.getLogger(__name__)
 def keyboard_builder(
     type: str, target_level: str, ticket_id: int
 ) -> InlineKeyboardMarkup | None:
-    cb1 = SendMessageKbCallback(ticket_id=int(ticket_id), action="create_report")
+
     if type == "ticket":
         if target_level == "workers":
-            cb1 = SendMessageKbCallback(
+            create_report_cb = SendMessageKbCallback(
                 ticket_id=int(ticket_id), action="create_report"
             )
-            cb2 = SendMessageKbCallback(
+            accept_ticket_cb = SendMessageKbCallback(
                 ticket_id=int(ticket_id), action="accept_ticket"
+            )
+            add_comment_cb = SendMessageKbCallback(
+                ticket_id=int(ticket_id), action="add_comment"
             )
             # print(cb1.pack())
             keyboard = InlineKeyboardMarkup(
                 inline_keyboard=[
                     [
                         InlineKeyboardButton(
-                            text="Подтвердить получение", callback_data=cb2.pack()
+                            text="Подтвердить получение",
+                            callback_data=accept_ticket_cb.pack(),
                         ),
                         InlineKeyboardButton(
-                            text="Создать отчёт", callback_data=cb1.pack()
+                            text="Добавить комментарий",
+                            callback_data=add_comment_cb.pack(),
+                        ),
+                        InlineKeyboardButton(
+                            text="Создать отчёт",
+                            callback_data=create_report_cb.pack(),
                         ),
                     ]
                 ]

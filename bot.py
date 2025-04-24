@@ -13,7 +13,7 @@ from handlers.commands import start, cancel, help
 from handlers.main_menu import (
     main_menu,
 )
-from handlers.ticket import show_ticket, create_ticket, set_subdivisions
+from handlers.ticket import show_ticket, create_ticket, set_subdivisions, add_comment
 from handlers.report import create_report, accept_ticket
 from services.logger import logger
 import settings
@@ -33,7 +33,12 @@ async def configure_bot():
 
     await bot.delete_webhook(drop_pending_updates=True)
 
-    ticket_routers = [create_ticket.router, show_ticket.router, set_subdivisions.router]
+    ticket_routers = [
+        create_ticket.router,
+        show_ticket.router,
+        set_subdivisions.router,
+        add_comment.router,
+    ]
     report_routers = [create_report.router, accept_ticket.router]
     command_routers = [cancel.router, help.router, start.router]
 

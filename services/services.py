@@ -10,7 +10,7 @@ def encrypt_telegram_id(telegram_id: int) -> str:
     key = settings.SECRET_KEY
     data = struct.pack(">Q", telegram_id)
     nonce = os.urandom(8)
-    cipher = AES.new(key.encode('UTF-8'), AES.MODE_CTR, nonce=nonce)
+    cipher = AES.new(key.encode("UTF-8"), AES.MODE_CTR, nonce=nonce)
     ciphertext = cipher.encrypt(data)
     token = base64.urlsafe_b64encode(nonce + ciphertext).decode("utf-8")
     return token
@@ -79,6 +79,17 @@ def accept_ticket(telegram_id: int, ticket_id: int):
     headers = {"X-Custom-Token": token}
     json = {"ticket_id": ticket_id, "status": "Recieved"}
     print(json)
+    response = requests.patch(url=url, json=json, headers=headers)
+    print(response, f"body: {response.json()}")
+    return response.json()
+
+
+def set_comment(telegram_id: int, ticket_id: int, comment_text: str):
+    url = settings.BASE_URL + "api/v1/tickets/set_comment"
+    token = encrypt_telegram_id(telegram_id)
+    headers = {"X-Custom-Token": token}
+    json = {"ticket_id": ticket_id, "comment_text": comment_text}
+
     response = requests.patch(url=url, json=json, headers=headers)
     print(response, f"body: {response.json()}")
     return response.json()
