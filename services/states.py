@@ -25,8 +25,11 @@ class TicketStates(StatesGroup):
     set_subdivisions = State()
     get_ticket_id = State()
     get_ticket_id_for_set_comment = State()
+    get_ticket_id_for_edit_ticket = State()
     set_comment = State()
     end_set_comment = State()
+    edit_ticket = State()
+    end_edit_ticket = State()
     # set_status = State()
     # set_workers = State()
 

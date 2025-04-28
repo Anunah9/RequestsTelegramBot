@@ -93,3 +93,14 @@ def set_comment(telegram_id: int, ticket_id: int, comment_text: str):
     response = requests.patch(url=url, json=json, headers=headers)
     print(response, f"body: {response.json()}")
     return response.json()
+
+
+def edit_ticket(telegram_id: int, ticket_id: int, edited_text: str):
+    url = settings.BASE_URL + "api/v1/tickets/edit_ticket"
+    token = encrypt_telegram_id(telegram_id)
+    headers = {"X-Custom-Token": token}
+    json = {"ticket_id": ticket_id, "edited_text": edited_text}
+
+    response = requests.patch(url=url, json=json, headers=headers)
+    print(response, f"body: {response.json()}")
+    return response.json()

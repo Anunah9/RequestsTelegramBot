@@ -13,7 +13,14 @@ from handlers.commands import start, cancel, help
 from handlers.main_menu import (
     main_menu,
 )
-from handlers.ticket import show_ticket, create_ticket, set_subdivisions, add_comment
+from handlers.ticket import (
+    show_ticket,
+    create_ticket,
+    set_subdivisions,
+    add_comment,
+    change_ticket,
+    delete_ticket,
+)
 from handlers.report import create_report, accept_ticket
 from services.logger import logger
 import settings
@@ -38,6 +45,7 @@ async def configure_bot():
         show_ticket.router,
         set_subdivisions.router,
         add_comment.router,
+        change_ticket.router,
     ]
     report_routers = [create_report.router, accept_ticket.router]
     command_routers = [cancel.router, help.router, start.router]

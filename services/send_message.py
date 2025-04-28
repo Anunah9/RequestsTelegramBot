@@ -24,7 +24,6 @@ def keyboard_builder(
             add_comment_cb = SendMessageKbCallback(
                 ticket_id=int(ticket_id), action="add_comment"
             )
-            # print(cb1.pack())
             keyboard = InlineKeyboardMarkup(
                 inline_keyboard=[
                     [
