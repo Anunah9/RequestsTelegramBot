@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from typing import Optional
 from aiogram import F, Router
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
@@ -11,19 +11,18 @@ from settings import BASE_URL
 from callbacks import FilterTicketsCallback
 from keyboards.filter_view_tickets_kb import filter_view_tickets_kb
 
-# from middlewares.check_user_right import CheckUserRight
-
 router = Router()
-# router.message.middleware(CheckUserRight("get_all_orders"))
 
 
 def build_ticket_message(
     *,
     ticket_id: int,
     ticket_text: str,
-    created_at: date,
+    created_at: datetime,
     status: str,
     report_text: Optional[str],
+    comment: Optional[str],
+    subdivisions: str,
 ) -> str:
     """Формирует текст сообщения по информации о заявке"""
     # print(STATUSES.get(status, "NaN"))
@@ -31,7 +30,9 @@ def build_ticket_message(
         f"ID заявки: {ticket_id}\n",
         f"Текст заявки: {ticket_text}\n",
         f"Статус заявки: {status}\n",
+        f"Подразделения: {subdivisions}\n",
         f"Отчёт по заявке: {report_text}\n" if report_text else "",
+        f"Комментарий по заявке: {comment}\n" if comment else "",
         f"Создана: {created_at}",
     )
     return "".join(text)
@@ -82,6 +83,7 @@ async def show_ticket_handler(
     count = paginated_response.get("count")
     pages = round(count / 10)
     tickets: list[dict] = paginated_response.get("results")
+    print(tickets)
     tickets_list = [
         f"Страница {1 if not previous_page else previous_page+1} из {pages}",
     ]
@@ -92,6 +94,8 @@ async def show_ticket_handler(
             created_at=ticket.get("created_at"),
             status=ticket.get("status"),
             report_text=ticket.get("report_text"),
+            comment=ticket.get("comment"),
+            subdivisions=ticket.get("subdivisions"),
         )
         tickets_list.append(ticket_message)
 
