@@ -23,4 +23,12 @@ async def accept_ticket_btn_handler(
         await callback.message.answer("Заявка принята!")
     else:
         await callback.message.answer("Что-то пошло не так")
+    current_markup = callback.message.reply_markup
+    if current_markup and current_markup.inline_keyboard:
+        for row in current_markup.inline_keyboard:
+            for button in row:
+                if button.callback_data == callback.data:
+                    # ну и просто удаляем её
+                    row.remove(button)
+    await callback.message.edit_reply_markup(reply_markup=current_markup)
     await callback.answer()

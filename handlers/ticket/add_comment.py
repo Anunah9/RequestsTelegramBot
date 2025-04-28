@@ -15,7 +15,7 @@ from services.states import TicketStates
 router = Router()
 
 
-@router.message(F.text == "Добавить комментарий заявке")
+@router.message(F.text == "Добавить комментарий")
 async def choose_ticket_id_handler(message: Message, state: FSMContext):
     await message.answer("Введите ID заявки:")
     await state.set_state(TicketStates.get_ticket_id_for_set_comment)
@@ -26,14 +26,6 @@ async def set_ticket_id_handler(message: Message, state: FSMContext):
     await state.update_data(ticket_id=message.text)
     await message.answer("Введите текст комментария:")
     await state.set_state(TicketStates.set_comment)
-
-
-@router.message(TicketStates.set_comment)
-async def set_comment_text(message: Message, state: FSMContext):
-    ticket_id = await state.get_value("ticket_id")
-    set_comment(
-        ticket_id=ticket_id, comment_text=message.text, telegram_id=message.chat.id
-    )
 
 
 @router.callback_query(SendMessageKbCallback.filter(F.action == "add_comment"))
@@ -77,13 +69,13 @@ async def complete_set_comment(
 
     comment_data = await state.get_data()
 
-    report_creation_response: dict = await set_comment(
+    set_comment(
         ticket_id=comment_data.get("ticket_id"),
         comment_text=comment_data.get("text"),
         telegram_id=callback.from_user.id,
     )
     await callback.message.answer(
-        text=f"Отчёт добавлен\n Его ID - {report_creation_response.get("id")}",
+        text=f"Комментарий добавлен",
     )
 
     await callback.bot.edit_message_reply_markup(
