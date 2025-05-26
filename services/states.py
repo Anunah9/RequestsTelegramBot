@@ -4,6 +4,7 @@ from aiogram.fsm.state import State, StatesGroup
 class ReportStates(StatesGroup):
     # Состояния для работы с заявками
     set_text = State()
+    add_photo = State()
     choose_order_id = State()
     end_creation_report = State()
     set_departments = State()

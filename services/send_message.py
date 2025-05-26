@@ -1,9 +1,18 @@
+import os
 from typing import Optional
 import aiogram
+from aiogram import types
+from aiogram.enums import InputMediaType
 from aiogram.exceptions import TelegramAPIError
 import logging
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    FSInputFile,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    InputFile,
+)
 from callbacks import SendMessageKbCallback
+from settings import BASE_URL
 
 
 logger = logging.getLogger(__name__)
@@ -71,6 +80,7 @@ async def send_message_to_user(
     text: str,
     type: Optional[str] = None,
     target_level: Optional[str] = None,
+    attachments: Optional[list[str]] = None,
 ) -> bool:
     """
     Отправляет сообщение пользователю с идентификатором user_id.
@@ -87,9 +97,33 @@ async def send_message_to_user(
     else:
         keyboard = None
     try:
+        if not attachments:
+            await bot.send_message(chat_id=user_id, text=text, reply_markup=keyboard)
+            return True
+        else:
+            print(attachments)
 
-        await bot.send_message(chat_id=user_id, text=text, reply_markup=keyboard)
-        return True
+            await bot.send_message(chat_id=user_id, text=text)
+            attachments = [
+                types.InputMediaPhoto(
+                    type=InputMediaType.PHOTO, media=FSInputFile("/app" + url)
+                )
+                for url in attachments
+            ]
+            print(attachments)
+            if len(attachments) > 1:
+                # отправляем альбомом
+                await bot.send_media_group(chat_id=user_id, media=attachments)
+            else:
+                single_media: types.InputMediaPhoto = attachments[0]
+                await bot.send_photo(
+                    chat_id=user_id,
+                    photo=single_media.media,
+                    caption=single_media.caption or None,
+                )
+
+            return True
+
     except TelegramAPIError as e:
         logger.error(f"Ошибка при отправке сообщения пользователю {user_id}: {e}")
         return False

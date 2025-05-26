@@ -1,7 +1,9 @@
 import base64
 import os
 import struct
+from typing import BinaryIO
 from Crypto.Cipher import AES
+from aiogram.types import File, PhotoSize
 import requests
 import settings
 
@@ -104,3 +106,34 @@ def edit_ticket(telegram_id: int, ticket_id: int, edited_text: str):
     response = requests.patch(url=url, json=json, headers=headers)
     print(response, f"body: {response.json()}")
     return response.json()
+
+
+async def get_photo(photo: list[PhotoSize]):
+    from bot import bot
+
+    file: File = await bot.get_file(photo[-1].file_id)
+    download_file: BinaryIO = await bot.download_file(file.file_path)
+    return download_file
+
+
+async def add_report_photo(
+    report_id: int, photo_album: list[PhotoSize], telegram_id: int
+):
+    token = encrypt_telegram_id(telegram_id)
+    headers = {"X-Custom-Token": token}
+    url = settings.BASE_URL + "api/v1/report/add_report_attachment"
+    buffers = [await get_photo(photo) for photo in photo_album]
+    files = []
+    for idx, buf in enumerate(buffers, start=1):
+        buf.seek(0)
+        files.append(("attachments", (f"image_{idx}.jpg", buf, "image/jpeg")))
+    data = {
+        "report_id": report_id,
+    }
+
+    response = requests.post(url=url, data=data, files=files, headers=headers)
+    if response.status_code == 200:
+        print(f"body: {response.json()}")
+        return response.json()
+    else:
+        print(response)

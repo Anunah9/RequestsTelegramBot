@@ -34,6 +34,7 @@ class MessageBody(BaseModel):
     user_ids: list[int]
     text: str
     ticket_id: Optional[int] = None
+    attachments: Optional[list[str]] = None
 
 
 @router.post("/send_message")
@@ -53,6 +54,7 @@ async def bulk_send_message(
     }
     """
     print(body.model_dump())
+
     for id in body.user_ids:
 
         success = await send_message_to_user(
@@ -62,6 +64,7 @@ async def bulk_send_message(
             type=body.type,
             target_level=body.target_level,
             ticket_id=body.ticket_id,
+            attachments=body.attachments,
         )
         if not success:
             raise HTTPException(

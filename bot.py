@@ -39,7 +39,7 @@ async def configure_bot():
     dp = Dispatcher(storage=MemoryStorage())
 
     await bot.delete_webhook(drop_pending_updates=True)
-
+    
     ticket_routers = [
         create_ticket.router,
         show_ticket.router,
